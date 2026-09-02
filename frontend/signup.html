@@ -1,0 +1,609 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>SpecPilot - Create Account</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1"
+        rel="stylesheet"
+    >
+
+    <script>
+
+        tailwind.config = {
+
+            theme: {
+
+                extend: {
+
+                    colors: {
+
+                        "surface": "#f7f9fb",
+                        "on-surface": "#191c1e",
+                        "on-surface-variant": "#464554",
+                        "outline": "#777586",
+                        "outline-variant": "#c7c4d7",
+                        "primary-container": "#4338ca",
+                        "primary": "#2a14b4"
+
+                    },
+
+                    fontFamily: {
+
+                        "label": ["Hanken Grotesk"],
+                        "body": ["Plus Jakarta Sans"]
+
+                    }
+
+                }
+
+            }
+
+        };
+
+    </script>
+
+    <style>
+
+        .material-symbols-outlined {
+
+            font-variation-settings:
+                'FILL' 1,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body
+    class="bg-surface min-h-screen flex items-center justify-center p-4 md:p-10 antialiased text-on-surface"
+>
+
+
+<div
+    class="w-full max-w-[420px] bg-white rounded-[2rem] border border-outline-variant shadow-[0_4px_12px_rgba(15,23,42,0.05)] p-8 md:p-10 relative overflow-hidden"
+>
+
+
+    <!-- Top Glow -->
+
+    <div
+        class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary-container to-transparent opacity-50"
+    ></div>
+
+
+    <!-- Header -->
+
+    <div class="flex flex-col items-center mb-8">
+
+        <div
+            class="w-12 h-12 bg-primary-container/10 rounded-xl flex items-center justify-center mb-4 text-primary-container"
+        >
+
+            <span class="material-symbols-outlined text-2xl">
+                person_add
+            </span>
+
+        </div>
+
+
+        <h1
+            class="font-semibold text-[32px] leading-[40px] text-on-surface mb-2 tracking-tight"
+        >
+            Create Account
+        </h1>
+
+
+        <p
+            class="font-body text-[14px] leading-5 text-on-surface-variant text-center"
+        >
+            Create your SpecPilot workspace account.
+        </p>
+
+    </div>
+
+
+    <!-- Error -->
+
+    <div
+        id="signupError"
+        class="hidden mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm"
+    ></div>
+
+
+    <!-- Success -->
+
+    <div
+        id="signupSuccess"
+        class="hidden mb-5 p-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm"
+    ></div>
+
+
+    <!-- Form -->
+
+    <form
+        id="signupForm"
+        class="space-y-5"
+    >
+
+
+        <!-- Name -->
+
+        <div>
+
+            <label
+                for="name"
+                class="block text-[12px] text-on-surface-variant mb-1.5 ml-1"
+            >
+                Full Name
+            </label>
+
+
+            <div class="relative">
+
+                <span
+                    class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-outline"
+                >
+
+                    <span class="material-symbols-outlined text-xl">
+                        person
+                    </span>
+
+                </span>
+
+
+                <input
+                    id="name"
+                    type="text"
+                    placeholder="Your name"
+                    autocomplete="name"
+                    required
+                    class="w-full bg-white border border-outline-variant rounded-xl py-2.5 pl-11 pr-4 text-[16px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/10 transition"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- Email -->
+
+        <div>
+
+            <label
+                for="signupEmail"
+                class="block text-[12px] text-on-surface-variant mb-1.5 ml-1"
+            >
+                Work Email
+            </label>
+
+
+            <div class="relative">
+
+                <span
+                    class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-outline"
+                >
+
+                    <span class="material-symbols-outlined text-xl">
+                        mail
+                    </span>
+
+                </span>
+
+
+                <input
+                    id="signupEmail"
+                    type="email"
+                    placeholder="name@company.com"
+                    autocomplete="email"
+                    required
+                    class="w-full bg-white border border-outline-variant rounded-xl py-2.5 pl-11 pr-4 text-[16px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/10 transition"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- Password -->
+
+        <div>
+
+            <label
+                for="signupPassword"
+                class="block text-[12px] text-on-surface-variant mb-1.5 ml-1"
+            >
+                Password
+            </label>
+
+
+            <div class="relative">
+
+                <span
+                    class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-outline"
+                >
+
+                    <span class="material-symbols-outlined text-xl">
+                        lock
+                    </span>
+
+                </span>
+
+
+                <input
+                    id="signupPassword"
+                    type="password"
+                    placeholder="Create a password"
+                    autocomplete="new-password"
+                    required
+                    class="w-full bg-white border border-outline-variant rounded-xl py-2.5 pl-11 pr-12 text-[16px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/10 transition"
+                >
+
+
+                <button
+                    type="button"
+                    id="toggleSignupPassword"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary"
+                >
+
+                    <span class="material-symbols-outlined">
+                        visibility
+                    </span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- Confirm Password -->
+
+        <div>
+
+            <label
+                for="confirmPassword"
+                class="block text-[12px] text-on-surface-variant mb-1.5 ml-1"
+            >
+                Confirm Password
+            </label>
+
+
+            <div class="relative">
+
+                <span
+                    class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-outline"
+                >
+
+                    <span class="material-symbols-outlined text-xl">
+                        lock_reset
+                    </span>
+
+                </span>
+
+
+                <input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Confirm your password"
+                    autocomplete="new-password"
+                    required
+                    class="w-full bg-white border border-outline-variant rounded-xl py-2.5 pl-11 pr-12 text-[16px] focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/10 transition"
+                >
+
+
+                <button
+                    type="button"
+                    id="toggleConfirmPassword"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary"
+                >
+
+                    <span class="material-symbols-outlined">
+                        visibility
+                    </span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- Create Account -->
+
+        <div class="pt-2">
+
+            <button
+                id="signupButton"
+                type="submit"
+                class="w-full bg-primary-container text-white font-semibold text-[14px] py-3 rounded-xl hover:bg-primary transition flex items-center justify-center gap-2"
+            >
+
+                <span id="signupButtonText">
+                    Create Account
+                </span>
+
+                <span class="material-symbols-outlined">
+                    arrow_forward
+                </span>
+
+            </button>
+
+        </div>
+
+    </form>
+
+
+    <!-- Footer -->
+
+    <div class="mt-8 text-center">
+
+        <p class="text-[14px] text-on-surface-variant">
+
+            Already have an account?
+
+            <a
+                href="index.html"
+                class="font-semibold text-primary-container hover:text-primary ml-1"
+            >
+                Sign in
+            </a>
+
+        </p>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+const signupForm =
+    document.getElementById("signupForm");
+
+
+const nameInput =
+    document.getElementById("name");
+
+
+const emailInput =
+    document.getElementById("signupEmail");
+
+
+const passwordInput =
+    document.getElementById("signupPassword");
+
+
+const confirmPasswordInput =
+    document.getElementById("confirmPassword");
+
+
+const signupError =
+    document.getElementById("signupError");
+
+
+const signupSuccess =
+    document.getElementById("signupSuccess");
+
+
+const signupButton =
+    document.getElementById("signupButton");
+
+
+const signupButtonText =
+    document.getElementById("signupButtonText");
+
+
+// --------------------------------------------------
+// PASSWORD VISIBILITY
+// --------------------------------------------------
+
+document
+    .getElementById("toggleSignupPassword")
+    .addEventListener("click", function () {
+
+        if (passwordInput.type === "password") {
+
+            passwordInput.type = "text";
+
+            this.innerHTML = `
+                <span class="material-symbols-outlined">
+                    visibility_off
+                </span>
+            `;
+
+        } else {
+
+            passwordInput.type = "password";
+
+            this.innerHTML = `
+                <span class="material-symbols-outlined">
+                    visibility
+                </span>
+            `;
+
+        }
+
+    });
+
+
+document
+    .getElementById("toggleConfirmPassword")
+    .addEventListener("click", function () {
+
+        if (confirmPasswordInput.type === "password") {
+
+            confirmPasswordInput.type = "text";
+
+            this.innerHTML = `
+                <span class="material-symbols-outlined">
+                    visibility_off
+                </span>
+            `;
+
+        } else {
+
+            confirmPasswordInput.type = "password";
+
+            this.innerHTML = `
+                <span class="material-symbols-outlined">
+                    visibility
+                </span>
+            `;
+
+        }
+
+    });
+
+
+// --------------------------------------------------
+// SIGN UP
+// --------------------------------------------------
+
+signupForm.addEventListener("submit", function (event) {
+
+    event.preventDefault();
+
+
+    signupError.classList.add("hidden");
+
+    signupSuccess.classList.add("hidden");
+
+
+    const name =
+        nameInput.value.trim();
+
+
+    const email =
+        emailInput.value.trim().toLowerCase();
+
+
+    const password =
+        passwordInput.value;
+
+
+    const confirmPassword =
+        confirmPasswordInput.value;
+
+
+    // Validation
+
+    if (name.length < 2) {
+
+        showError(
+            "Please enter your full name."
+        );
+
+        return;
+    }
+
+
+    if (password.length < 8) {
+
+        showError(
+            "Password must contain at least 8 characters."
+        );
+
+        return;
+    }
+
+
+    if (password !== confirmPassword) {
+
+        showError(
+            "Passwords do not match."
+        );
+
+        return;
+    }
+
+
+    // Loading state
+    signupButton.disabled = true;
+    signupButton.classList.add("opacity-70", "cursor-not-allowed");
+    signupButtonText.textContent = "Creating Account...";
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/auth/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            showError(data.detail || "Failed to create account. Please try again.");
+            signupButton.disabled = false;
+            signupButton.classList.remove("opacity-70", "cursor-not-allowed");
+            signupButtonText.textContent = "Create Account";
+            return;
+        }
+
+        // Save session
+        localStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("user_id", data.user_id);
+
+        signupSuccess.textContent = "Account created successfully! Redirecting to dashboard...";
+        signupSuccess.classList.remove("hidden");
+
+        setTimeout(function () {
+            window.location.href = "pages/dashboard.html";
+        }, 1000);
+
+    } catch (err) {
+        console.error("Signup error:", err);
+        showError("Unable to connect to SpecPilot backend. Please ensure the server is running.");
+        signupButton.disabled = false;
+        signupButton.classList.remove("opacity-70", "cursor-not-allowed");
+        signupButtonText.textContent = "Create Account";
+    }
+});
+
+
+// --------------------------------------------------
+// ERROR FUNCTION
+// --------------------------------------------------
+
+function showError(message) {
+    signupError.textContent = message;
+    signupError.classList.remove("hidden");
+}
+
+
+</script>
+
+
+</body>
+</html>
+

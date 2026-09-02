@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html class="h-full bg-background" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+    <title>SpecPilot - Create Project</title>
+
+    <!-- Material Symbols -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet"
+    />
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Tailwind Configuration -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+
+            theme: {
+                extend: {
+
+                    colors: {
+                        "primary": "#2a14b4",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#191c1e",
+                        "secondary-container": "#d0e1fb",
+                        "on-tertiary-container": "#b7c6dc",
+                        "surface-bright": "#f7f9fb",
+                        "on-primary-container": "#c1beff",
+                        "outline-variant": "#c7c4d7",
+                        "surface-container": "#eceef0",
+                        "tertiary": "#2d3c4d",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface": "#f7f9fb",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f2f4f6",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e0e3e5",
+                        "tertiary-fixed": "#d4e4fa",
+                        "on-surface-variant": "#464554",
+                        "inverse-surface": "#2d3133",
+                        "inverse-on-surface": "#eff1f3",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-error": "#ffffff",
+                        "on-secondary-container": "#54647a",
+                        "tertiary-fixed-dim": "#b9c8de",
+                        "on-tertiary-fixed-variant": "#39485a",
+                        "primary-container": "#4338ca",
+                        "on-primary-fixed-variant": "#372abf",
+                        "secondary": "#505f76",
+                        "surface-tint": "#5148d7",
+                        "primary-fixed": "#e3dfff",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#c3c0ff",
+                        "secondary-fixed": "#d3e4fe",
+                        "on-tertiary-fixed": "#0d1c2d",
+                        "on-primary-fixed": "#100069",
+                        "tertiary-container": "#445365",
+                        "on-background": "#191c1e",
+                        "outline": "#777586",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d8dadc"
+                    },
+
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+
+                    spacing: {
+                        "unit-sm": "0.5rem",
+                        "container-max": "1280px",
+                        "sidebar-width": "260px",
+                        "margin-desktop": "2.5rem",
+                        "unit-xs": "0.25rem",
+                        "unit-lg": "2rem",
+                        "margin-mobile": "1rem",
+                        "gutter": "1.5rem",
+                        "unit-md": "1rem"
+                    },
+
+                    fontFamily: {
+                        "headline-lg": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "headline-xl": ["Hanken Grotesk"],
+                        "label-md": ["Hanken Grotesk"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "body-sm": ["Plus Jakarta Sans"]
+                    },
+
+                    fontSize: {
+                        "headline-lg": [
+                            "32px",
+                            {
+                                lineHeight: "40px",
+                                letterSpacing: "-0.01em",
+                                fontWeight: "600"
+                            }
+                        ],
+
+                        "headline-md": [
+                            "24px",
+                            {
+                                lineHeight: "32px",
+                                fontWeight: "600"
+                            }
+                        ],
+
+                        "headline-xl": [
+                            "40px",
+                            {
+                                lineHeight: "48px",
+                                letterSpacing: "-0.02em",
+                                fontWeight: "700"
+                            }
+                        ],
+
+                        "label-md": [
+                            "14px",
+                            {
+                                lineHeight: "16px",
+                                letterSpacing: "0.05em",
+                                fontWeight: "600"
+                            }
+                        ],
+
+                        "body-lg": [
+                            "18px",
+                            {
+                                lineHeight: "28px",
+                                fontWeight: "400"
+                            }
+                        ],
+
+                        "body-md": [
+                            "16px",
+                            {
+                                lineHeight: "24px",
+                                fontWeight: "400"
+                            }
+                        ],
+
+                        "label-sm": [
+                            "12px",
+                            {
+                                lineHeight: "14px",
+                                fontWeight: "500"
+                            }
+                        ],
+
+                        "body-sm": [
+                            "14px",
+                            {
+                                lineHeight: "20px",
+                                fontWeight: "400"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #e0e3e5;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c7c4d7;
+        }
+    </style>
+</head>
+
+
+<body class="bg-background text-on-background font-body-md min-h-screen flex overflow-x-hidden">
+
+
+    <!-- ========================================================= -->
+    <!-- SIDEBAR -->
+    <!-- ========================================================= -->
+
+    <aside
+        class="w-sidebar-width h-screen fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant hidden md:flex flex-col z-20"
+    >
+
+        <!-- BRAND -->
+
+        <div class="flex items-center gap-3 mb-8 px-2 mt-2">
+
+            <div
+                class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container"
+            >
+                <span class="material-symbols-outlined text-[20px]">
+                    rocket_launch
+                </span>
+            </div>
+
+            <div>
+
+                <h1
+                    class="font-headline-md text-headline-md font-bold text-primary"
+                >
+                    SpecPilot
+                </h1>
+
+                <p
+                    class="font-label-sm text-label-sm text-on-surface-variant"
+                >
+                    AI Project Manager
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- NAVIGATION -->
+
+        <nav class="flex-1 px-unit-md space-y-1">
+
+            <!-- Dashboard -->
+
+            <a
+                href="dashboard.html"
+                class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
+            >
+
+                <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">
+                    dashboard
+                </span>
+
+                <span class="font-label-md text-label-md">
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <!-- Projects -->
+
+            <a
+                href="create-project.html"
+                class="flex items-center gap-3 bg-secondary-container text-on-secondary-container rounded-lg px-4 py-3 border-l-4 border-primary transition-colors duration-200 shadow-sm relative overflow-hidden"
+            >
+
+                <span class="material-symbols-outlined text-primary">
+                    folder_open
+                </span>
+
+                <span class="font-label-md text-label-md font-bold text-primary">
+                    Projects
+                </span>
+
+            </a>
+
+
+            <!-- Feedback -->
+
+            <a
+                href="feedback.html"
+                class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
+            >
+
+                <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">
+                    feedback
+                </span>
+
+                <span class="font-label-md text-label-md">
+                    Feedback
+                </span>
+
+            </a>
+
+
+            <!-- Settings -->
+
+            <a
+                href="#"
+                class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
+            >
+
+                <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">
+                    settings
+                </span>
+
+                <span class="font-label-md text-label-md">
+                    Settings
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <!-- NEW PROJECT -->
+
+        <div class="p-unit-md mt-auto">
+
+            <button
+                id="newProjectBtn"
+                type="button"
+                class="w-full bg-primary hover:bg-[#3730a3] text-on-primary font-label-md text-label-md py-3 px-4 rounded-[12px] flex items-center justify-center gap-2 shadow-sm transition-all duration-200"
+            >
+
+                <span class="material-symbols-outlined text-[18px]">
+                    add
+                </span>
+
+                New Project
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ========================================================= -->
+    <!-- MAIN -->
+    <!-- ========================================================= -->
+
+    <div class="flex-1 flex flex-col md:ml-sidebar-width min-h-screen">
+
+
+        <!-- ===================================================== -->
+        <!-- TOP NAVBAR -->
+        <!-- ===================================================== -->
+
+        <header
+            class="sticky top-0 z-30 h-16 bg-surface/90 backdrop-blur-md border-b border-outline-variant flex items-center w-full px-4 md:px-8"
+        >
+
+            <!-- Mobile Brand -->
+
+            <div class="md:hidden flex items-center gap-3">
+
+                <button
+                    type="button"
+                    class="text-on-surface-variant hover:bg-surface-container-highest p-2 rounded-full"
+                >
+
+                    <span class="material-symbols-outlined">
+                        menu
+                    </span>
+
+                </button>
+
+                <h1
+                    class="font-headline-md text-headline-md font-bold text-primary"
+                >
+                    SpecPilot
+                </h1>
+
+            </div>
+
+
+            <!-- Page Context -->
+
+            <div class="hidden md:block">
+
+                <p class="font-label-sm text-label-sm text-on-surface-variant">
+                    PROJECTS
+                </p>
+
+            </div>
+
+
+            <!-- RIGHT SIDE -->
+
+            <div class="ml-auto flex items-center gap-2">
+
+
+                <!-- Notifications -->
+
+                <button
+                    type="button"
+                    class="text-on-surface-variant hover:bg-surface-container-highest p-2 rounded-full transition-colors relative"
+                >
+
+                    <span class="material-symbols-outlined">
+                        notifications
+                    </span>
+
+                    <span
+                        class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border border-surface"
+                    ></span>
+
+                </button>
+
+
+                <!-- Help -->
+
+                <button
+                    type="button"
+                    class="text-on-surface-variant hover:bg-surface-container-highest p-2 rounded-full transition-colors hidden sm:block"
+                >
+
+                    <span class="material-symbols-outlined">
+                        help_outline
+                    </span>
+
+                </button>
+
+
+                <!-- USER -->
+
+                <div class="relative ml-2">
+
+                    <button
+                        id="userProfileBtn"
+                        type="button"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant/30"
+                    >
+
+                        <div
+                            id="userProfileInitial"
+                            class="w-9 h-9 rounded-full bg-primary-container text-primary flex items-center justify-center font-bold text-sm border border-outline-variant"
+                        >
+                            U
+                        </div>
+
+                        <div class="hidden sm:block text-left min-w-0">
+
+                            <p
+                                id="userName"
+                                class="font-label-sm text-label-sm text-on-surface truncate font-bold max-w-[130px]"
+                            >
+                                User
+                            </p>
+
+                            <p
+                                id="userRole"
+                                class="text-[11px] leading-tight text-on-surface-variant truncate"
+                            >
+                                Project Member
+                            </p>
+
+                        </div>
+
+                        <span
+                            id="profileArrow"
+                            class="material-symbols-outlined text-[18px] text-on-surface-variant"
+                        >
+                            expand_more
+                        </span>
+
+                    </button>
+
+
+                    <!-- DROPDOWN -->
+
+                    <div
+                        id="profileDropdown"
+                        class="hidden absolute right-0 top-full mt-2 w-56 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg z-50 overflow-hidden"
+                    >
+
+                        <div class="px-4 py-3 border-b border-outline-variant">
+
+                            <p
+                                id="dropdownUserName"
+                                class="font-label-sm text-label-sm text-on-surface font-bold truncate"
+                            >
+                                User
+                            </p>
+
+                            <p
+                                id="dropdownUserEmail"
+                                class="text-[11px] text-on-surface-variant truncate"
+                            >
+                                User account
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            id="signOutBtn"
+                            type="button"
+                            class="w-full flex items-center gap-3 px-4 py-3 text-left text-error hover:bg-error-container transition-colors"
+                        >
+
+                            <span class="material-symbols-outlined text-[20px]">
+                                logout
+                            </span>
+
+                            <span class="font-label-md text-label-md">
+                                Sign Out
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ===================================================== -->
+        <!-- CONTENT -->
+        <!-- ===================================================== -->
+
+        <main
+            class="flex-1 p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full"
+        >
+
+            <!-- PAGE HEADER -->
+
+            <div class="mb-8">
+
+                <div class="flex items-center gap-2 mb-3">
+
+                    <a
+                        href="dashboard.html"
+                        class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-body-sm text-body-sm"
+                    >
+
+                        <span class="material-symbols-outlined text-[18px]">
+                            arrow_back
+                        </span>
+
+                        Back to Projects
+
+                    </a>
+
+                </div>
+
+
+                <h2
+                    class="font-headline-xl text-headline-xl text-on-surface"
+                >
+                    Create New Project
+                </h2>
+
+                <p
+                    class="font-body-md text-body-md text-on-surface-variant mt-1 max-w-2xl"
+                >
+                    Define your project requirements and let SpecPilot help you
+                    turn them into a structured project plan.
+                </p>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- FORM -->
+            <!-- ================================================= -->
+
+            <form
+                id="projectForm"
+                class="space-y-6"
+            >
+
+                <!-- ================================================= -->
+                <!-- BASIC INFORMATION -->
+                <!-- ================================================= -->
+
+                <section
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 md:p-8 shadow-sm"
+                >
+
+                    <div class="flex items-start gap-3 mb-6">
+
+                        <div
+                            class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                        >
+
+                            <span class="material-symbols-outlined">
+                                description
+                            </span>
+
+                        </div>
+
+                        <div>
+
+                            <h3
+                                class="font-headline-md text-headline-md text-on-surface"
+                            >
+                                Basic Information
+                            </h3>
+
+                            <p
+                                class="font-body-sm text-body-sm text-on-surface-variant mt-1"
+                            >
+                                Start with the basic details of your project.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+
+                        <!-- PROJECT NAME -->
+
+                        <div class="md:col-span-2">
+
+                            <label
+                                for="projectName"
+                                class="block font-label-md text-label-md text-on-surface mb-2"
+                            >
+                                Project Name
+                                <span class="text-error">*</span>
+                            </label>
+
+                            <input
+                                id="projectName"
+                                type="text"
+                                placeholder="e.g. AI-Powered Student Learning Assistant"
+                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                            />
+
+                        </div>
+
+
+                        <!-- CATEGORY -->
+
+                        <div>
+
+                            <label
+                                for="category"
+                                class="block font-label-md text-label-md text-on-surface mb-2"
+                            >
+                                Category
+                                <span class="text-error">*</span>
+                            </label>
+
+                            <select
+                                id="category"
+                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                            >
+
+                                <option value="">
+                                    Select category
+                                </option>
+
+                                <option value="AI / Machine Learning">
+                                    AI / Machine Learning
+                                </option>
+
+                                <option value="Web Application">
+                                    Web Application
+                                </option>
+
+                                <option value="Mobile Application">
+                                    Mobile Application
+                                </option>
+
+                                <option value="Data Science">
+                                    Data Science
+                                </option>
+
+                                <option value="Automation">
+                                    Automation
+                                </option>
+
+                                <option value="Other">
+                                    Other
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- TIMELINE -->
+
+                        <div>
+
+                            <label
+                                for="timeline"
+                                class="block font-label-md text-label-md text-on-surface mb-2"
+                            >
+                                Timeline
+                                <span class="text-error">*</span>
+                            </label>
+
+                            <select
+                                id="timeline"
+                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                            >
+
+                                <option value="">
+                                    Select timeline
+                                </option>
+
+                                <option value="1-2 weeks">
+                                    1-2 weeks
+                                </option>
+
+                                <option value="2-4 weeks">
+                                    2-4 weeks
+                                </option>
+
+                                <option value="1-2 months">
+                                    1-2 months
+                                </option>
+
+                                <option value="3-6 months">
+                                    3-6 months
+                                </option>
+
+                                <option value="6+ months">
+                                    6+ months
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================================================= -->
+                <!-- PROJECT REQUIREMENTS -->
+                <!-- ================================================= -->
+
+                <section
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 md:p-8 shadow-sm"
+                >
+
+                    <div class="flex items-start gap-3 mb-6">
+
+                        <div
+                            class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                        >
+
+                            <span class="material-symbols-outlined">
+                                target
+                            </span>
+
+                        </div>
+
+                        <div>
+
+                            <h3
+                                class="font-headline-md text-headline-md text-on-surface"
+                            >
+                                Project Requirements
+                            </h3>
+
+                            <p
+                                class="font-body-sm text-body-sm text-on-surface-variant mt-1"
+                            >
+                                Explain what you want your project to accomplish.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="space-y-5">
+
+
+                        <!-- OBJECTIVE -->
+
+                        <div>
+
+                            <label
+                                for="objective"
+                                class="block font-label-md text-label-md text-on-surface mb-2"
+                            >
+                                Business Objective
+                                <span class="text-error">*</span>
+                            </label>
+
+                            <textarea
+                                id="objective"
+                                rows="4"
+                                placeholder="What should this project achieve?"
+                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-y"
+                            ></textarea>
+
+                        </div>
+
+
+                        <!-- TARGET USERS -->
+
+                        <div>
+
+                            <label
+                                for="targetUsers"
+                                class="block font-label-md text-label-md text-on-surface mb-2"
+                            >
+                                Target Users
+                                <span class="text-error">*</span>
+                            </label>
+
+                            <textarea
+                                id="targetUsers"
+                                rows="3"
+                                placeholder="Who will use this project?"
+                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-y"
+                            ></textarea>
+
+                        </div>
+
+
+                        <!-- PROBLEM -->
+
+                        <div>
+
+                            <label
+                                for="problemStatement"
+                                class="block font-label-md text-label-md text-on-surface mb-2"
+                            >
+                                Problem Statement
+                                <span class="text-error">*</span>
+                            </label>
+
+                            <textarea
+                                id="problemStatement"
+                                rows="4"
+                                placeholder="What problem are you trying to solve?"
+                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-y"
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================================================= -->
+                <!-- EXPECTED FEATURES -->
+                <!-- ================================================= -->
+
+                <section
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 md:p-8 shadow-sm"
+                >
+
+                    <div class="flex items-start gap-3 mb-6">
+
+                        <div
+                            class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                        >
+
+                            <span class="material-symbols-outlined">
+                                checklist
+                            </span>
+
+                        </div>
+
+                        <div>
+
+                            <h3
+                                class="font-headline-md text-headline-md text-on-surface"
+                            >
+                                Expected Features
+                            </h3>
+
+                            <p
+                                class="font-body-sm text-body-sm text-on-surface-variant mt-1"
+                            >
+                                Add the main features you expect in the project.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+
+                        <input
+                            id="featureInput"
+                            type="text"
+                            placeholder="e.g. User authentication"
+                            class="flex-1 bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
+                        />
+
+                        <button
+                            id="addFeatureBtn"
+                            type="button"
+                            class="bg-primary hover:bg-[#3730a3] text-on-primary font-label-md text-label-md px-5 py-3 rounded-lg flex items-center justify-center gap-2 transition-all"
+                        >
+
+                            <span class="material-symbols-outlined text-[18px]">
+                                add
+                            </span>
+
+                            Add Feature
+
+                        </button>
+
+                    </div>
+
+
+                    <ul
+                        id="featureList"
+                        class="mt-4 space-y-2"
+                    ></ul>
+
+                </section>
+
+
+                <!-- ================================================= -->
+                <!-- TECHNOLOGY -->
+                <!-- ================================================= -->
+
+                <section
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 md:p-8 shadow-sm"
+                >
+
+                    <div class="flex items-start gap-3 mb-6">
+
+                        <div
+                            class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                        >
+
+                            <span class="material-symbols-outlined">
+                                code
+                            </span>
+
+                        </div>
+
+                        <div>
+
+                            <h3
+                                class="font-headline-md text-headline-md text-on-surface"
+                            >
+                                Technology & Instructions
+                            </h3>
+
+                            <p
+                                class="font-body-sm text-body-sm text-on-surface-variant mt-1"
+                            >
+                                Tell SpecPilot about your preferred technologies
+                                and any additional requirements.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="space-y-5">
+
+
+                        <!-- TECHNOLOGY -->
+
+                        <div>
+
+                            <label
+                                for="techPrefs"
+                                class="block font-label-md text-label-md text-on-surface mb-2"
+                            >
+                                Technology Preferences
+                                <span class="text-error">*</span>
+                            </label>
+
+                            <textarea
+                                id="techPrefs"
+                                rows="3"
+                                placeholder="e.g. Python, FastAPI, React, PostgreSQL"
+                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-y"
+                            ></textarea>
+
+                        </div>
+
+
+                        <!-- ADDITIONAL INSTRUCTIONS -->
+
+                        <div>
+
+                            <label
+                                for="instructions"
+                                class="block font-label-md text-label-md text-on-surface mb-2"
+                            >
+                                Additional Instructions
+                                <span class="text-outline text-xs font-normal">
+                                    (Optional)
+                                </span>
+                            </label>
+
+                            <textarea
+                                id="instructions"
+                                rows="4"
+                                placeholder="Anything else SpecPilot should know?"
+                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-y"
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================================================= -->
+                <!-- ACTIONS -->
+                <!-- ================================================= -->
+
+                <div
+                    class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 pb-6"
+                >
+
+                    <button
+                        id="cancelButton"
+                        type="button"
+                        class="px-6 py-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container transition-colors font-label-md text-label-md"
+                    >
+                        Cancel
+                    </button>
+
+
+                    <button
+                        id="createProjectButton"
+                        type="submit"
+                        class="px-6 py-3 rounded-lg bg-primary hover:bg-[#3730a3] text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all"
+                    >
+
+                        <span
+                            id="createProjectIcon"
+                            class="material-symbols-outlined text-[18px]"
+                        >
+                            add
+                        </span>
+
+                        <span id="createProjectText">
+                            Create Project
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </main>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- AUTH JS -->
+    <!-- ========================================================= -->
+
+    <script src="../js/auth.js"></script>
+
+    <!-- ========================================================= -->
+    <!-- CREATE PROJECT JS -->
+    <!-- ========================================================= -->
+
+    <script src="../js/create-project.js"></script>
+
+</body>
+
+</html>

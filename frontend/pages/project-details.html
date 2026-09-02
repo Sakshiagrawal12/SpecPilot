@@ -1,0 +1,2659 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>SpecPilot - Project Details</title>
+
+
+<!-- =====================================================
+     FONTS
+====================================================== -->
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+>
+
+
+<!-- =====================================================
+     MATERIAL SYMBOLS
+====================================================== -->
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0"
+    rel="stylesheet"
+>
+
+
+<!-- =====================================================
+     TAILWIND
+====================================================== -->
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+
+    tailwind.config = {
+
+        theme: {
+
+            extend: {
+
+                colors: {
+
+                    primary: "#4f46e5",
+
+                    "primary-container": "#e0e7ff",
+
+                    secondary: "#7c3aed",
+
+                    "secondary-container": "#ede9fe",
+
+                    surface: "#f8fafc",
+
+                    "surface-container-low":
+                        "#f1f5f9",
+
+                    "surface-container":
+                        "#e2e8f0",
+
+                    "surface-container-high":
+                        "#cbd5e1",
+
+                    "surface-container-lowest":
+                        "#ffffff",
+
+                    "on-surface": "#0f172a",
+
+                    "on-surface-variant":
+                        "#64748b",
+
+                    outline: "#94a3b8",
+
+                    "outline-variant":
+                        "#cbd5e1"
+                },
+
+
+                fontFamily: {
+
+                    headline: [
+                        "Plus Jakarta Sans",
+                        "sans-serif"
+                    ],
+
+                    body: [
+                        "Hanken Grotesk",
+                        "sans-serif"
+                    ]
+                }
+
+            }
+        }
+    };
+
+</script>
+
+
+<!-- =====================================================
+     PAGE STYLES
+====================================================== -->
+
+<style>
+
+    html,
+    body {
+        min-height: 100%;
+    }
+
+
+    body {
+        font-family:
+            "Hanken Grotesk",
+            sans-serif;
+
+        background:
+            #f8fafc;
+
+        color:
+            #0f172a;
+    }
+
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family:
+            "Plus Jakarta Sans",
+            sans-serif;
+    }
+
+
+    .material-symbols-outlined {
+        font-variation-settings:
+            "FILL" 0,
+            "wght" 400,
+            "GRAD" 0,
+            "opsz" 24;
+    }
+
+
+    /* =================================================
+       CONTENT CARD
+    ================================================== */
+
+    .content-card {
+
+        background:
+            #ffffff;
+
+        border:
+            1px solid #cbd5e1;
+
+        border-radius:
+            0.75rem;
+
+        padding:
+            1.5rem;
+
+        transition:
+            box-shadow 0.2s ease,
+            border-color 0.2s ease;
+    }
+
+
+    .content-card:hover {
+
+        box-shadow:
+            0 8px 25px
+            rgba(15, 23, 42, 0.06);
+    }
+
+
+    .card-header {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 0.75rem;
+
+        margin-bottom:
+            1rem;
+    }
+
+
+    .content-text {
+
+        color:
+            #475569;
+
+        line-height:
+            1.75;
+
+        white-space:
+            normal;
+
+        word-break:
+            break-word;
+    }
+
+
+    .empty-content {
+
+        color:
+            #94a3b8;
+
+        font-style:
+            italic;
+    }
+
+
+    /* =================================================
+       GENERATION STATUS
+    ================================================== */
+
+    .generation-status {
+
+        font-size:
+            0.75rem;
+
+        font-weight:
+            600;
+
+        white-space:
+            nowrap;
+    }
+
+
+    /* =================================================
+       GENERATE BUTTON
+    ================================================== */
+
+    .generate-stage-button {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        gap: 0.5rem;
+
+        padding:
+            0.625rem 1rem;
+
+        border-radius:
+            0.625rem;
+
+        background:
+            #4f46e5;
+
+        color:
+            #ffffff;
+
+        font-size:
+            0.875rem;
+
+        font-weight:
+            600;
+
+        transition:
+            background 0.2s ease,
+            transform 0.1s ease,
+            opacity 0.2s ease;
+    }
+
+
+    .generate-stage-button:hover {
+
+        background:
+            #4338ca;
+    }
+
+
+    .generate-stage-button:active {
+
+        transform:
+            scale(0.98);
+    }
+
+
+    .generate-stage-button:disabled {
+
+        opacity:
+            0.65;
+
+        cursor:
+            not-allowed;
+    }
+
+
+    /* =================================================
+       ORIGINAL INFORMATION CARD
+    ================================================== */
+
+    .original-card {
+
+        background:
+            #f8fafc;
+
+        border:
+            1px solid #cbd5e1;
+
+        border-radius:
+            0.75rem;
+
+        padding:
+            1.25rem;
+    }
+
+
+    .original-label {
+
+        font-size:
+            0.75rem;
+
+        font-weight:
+            700;
+
+        text-transform:
+            uppercase;
+
+        letter-spacing:
+            0.04em;
+
+        color:
+            #64748b;
+
+        margin-bottom:
+            0.375rem;
+    }
+
+
+    .original-value {
+
+        color:
+            #334155;
+
+        line-height:
+            1.65;
+
+        white-space:
+            pre-wrap;
+
+        word-break:
+            break-word;
+    }
+
+
+    /* =================================================
+       SIDEBAR
+    ================================================== */
+
+    .sidebar {
+
+        width:
+            260px;
+    }
+
+
+    @media (max-width: 1024px) {
+
+        .sidebar {
+
+            width:
+                220px;
+        }
+
+    }
+
+
+    @media (max-width: 768px) {
+
+        .sidebar {
+
+            display:
+                none;
+        }
+
+    }
+
+</style>
+<!-- =====================================================
+     APPLICATION
+====================================================== -->
+
+<div class="min-h-screen flex">
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
+
+   <!-- =================================================
+     SIDEBAR
+================================================= -->
+
+<aside
+    class="
+        w-sidebar-width
+        h-screen
+        fixed
+        left-0
+        top-0
+        bg-surface-container-lowest
+        border-r
+        border-outline-variant
+        hidden
+        md:flex
+        flex-col
+        z-20
+    "
+>
+
+    <!-- =============================================
+         SIDEBAR BRAND
+    ============================================== -->
+
+    <div
+        class="
+            flex
+            items-center
+            gap-3
+            mb-8
+            px-6
+            pt-6
+        "
+    >
+
+        <div
+            class="
+                w-10
+                h-10
+                rounded-full
+                bg-primary-container
+                flex
+                items-center
+                justify-center
+                text-primary
+                flex-shrink-0
+            "
+        >
+
+            <span
+                class="
+                    material-symbols-outlined
+                    text-[22px]
+                "
+            >
+                rocket_launch
+            </span>
+
+        </div>
+
+
+        <div>
+
+            <h1
+                class="
+                    font-headline
+                    text-lg
+                    font-bold
+                    text-primary
+                "
+            >
+                SpecPilot
+            </h1>
+
+
+            <p
+                class="
+                    text-xs
+                    text-on-surface-variant
+                "
+            >
+                AI Project Manager
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =============================================
+         NAVIGATION
+    ============================================== -->
+
+    <nav
+        class="
+            flex-1
+            px-4
+            space-y-1
+        "
+    >
+
+        <!-- Dashboard -->
+
+        <a
+            href="dashboard.html"
+            class="
+                flex
+                items-center
+                gap-3
+                px-4
+                py-3
+                rounded-lg
+                text-on-surface-variant
+                hover:bg-surface-container-low
+                transition
+            "
+        >
+
+            <span
+                class="
+                    material-symbols-outlined
+                "
+            >
+                dashboard
+            </span>
+
+            <span>
+                Dashboard
+            </span>
+
+        </a>
+
+
+        <!-- Projects -->
+
+        <a
+            href="dashboard.html"
+            class="
+                flex
+                items-center
+                gap-3
+                px-4
+                py-3
+                rounded-lg
+                bg-primary-container
+                text-primary
+                font-semibold
+                transition
+            "
+        >
+
+            <span
+                class="
+                    material-symbols-outlined
+                "
+            >
+                folder
+            </span>
+
+            <span>
+                Projects
+            </span>
+
+        </a>
+
+
+        <!-- Feedback -->
+
+        <a
+            href="feedback.html"
+            class="
+                flex
+                items-center
+                gap-3
+                px-4
+                py-3
+                rounded-lg
+                text-on-surface-variant
+                hover:bg-surface-container-low
+                transition
+            "
+        >
+
+            <span
+                class="
+                    material-symbols-outlined
+                "
+            >
+                rate_review
+            </span>
+
+            <span>
+                Feedback
+            </span>
+
+        </a>
+
+
+        <!-- Settings -->
+
+        <a
+            href="settings.html"
+            class="
+                flex
+                items-center
+                gap-3
+                px-4
+                py-3
+                rounded-lg
+                text-on-surface-variant
+                hover:bg-surface-container-low
+                transition
+            "
+        >
+
+            <span
+                class="
+                    material-symbols-outlined
+                "
+            >
+                settings
+            </span>
+
+            <span>
+                Settings
+            </span>
+
+        </a>
+
+    </nav>
+
+
+    <!-- =============================================
+         NEW PROJECT BUTTON
+    ============================================== -->
+
+    <div
+        class="
+            px-4
+            pb-6
+        "
+    >
+
+        <button
+            id="newProjectBtn"
+            type="button"
+            class="
+                w-full
+                flex
+                items-center
+                justify-center
+                gap-2
+                px-4
+                py-3
+                rounded-lg
+                bg-primary
+                text-white
+                font-semibold
+                hover:opacity-90
+                transition
+            "
+        >
+
+            <span
+                class="
+                    material-symbols-outlined
+                "
+            >
+                add
+            </span>
+
+            <span>
+                New Project
+            </span>
+
+        </button>
+
+    </div>
+
+</aside>
+
+
+    <!-- =================================================
+         MAIN AREA
+    ================================================== -->
+
+   <main
+    class="
+        flex-1
+        min-w-0
+        flex
+        flex-col
+        md:ml-[200px]
+    "
+>
+
+
+        <!-- =============================================
+             TOP HEADER
+        ============================================== -->
+
+        <header
+            class="
+                h-20
+                bg-white
+                border-b
+                border-outline-variant
+                flex
+                items-center
+                justify-between
+                px-6
+                lg:px-10
+                flex-shrink-0
+            "
+        >
+
+            <!-- Left -->
+
+            <div
+                class="
+                    flex
+                    items-center
+                    gap-4
+                    min-w-0
+                "
+            >
+
+                <button
+                    id="backButton"
+                    type="button"
+                    class="
+                        w-10
+                        h-10
+                        rounded-lg
+                        border
+                        border-outline-variant
+                        flex
+                        items-center
+                        justify-center
+                        hover:bg-surface-container-low
+                        transition
+                        flex-shrink-0
+                    "
+                >
+
+                    <span
+                        class="
+                            material-symbols-outlined
+                        "
+                    >
+                        arrow_back
+                    </span>
+
+                </button>
+
+
+                <div class="min-w-0">
+
+                    <div
+                        class="
+                            text-xs
+                            text-on-surface-variant
+                            truncate
+                        "
+                    >
+                        Projects /
+                        <span
+                            id="breadcrumbProjectName"
+                        >
+                            Project
+                        </span>
+                    </div>
+
+
+                    <h1
+                        id="projectName"
+                        class="
+                            text-xl
+                            font-bold
+                            font-headline
+                            truncate
+                        "
+                    >
+                        Project
+                    </h1>
+
+                </div>
+
+            </div>
+
+
+            <!-- User Profile -->
+
+            <div class="relative">
+
+                <button
+                    id="userProfileBtn"
+                    type="button"
+                    class="
+                        flex
+                        items-center
+                        gap-3
+                        px-3
+                        py-2
+                        rounded-lg
+                        hover:bg-surface-container-low
+                        transition
+                    "
+                >
+
+                    <div
+                        id="userProfileInitial"
+                        class="
+                            w-9
+                            h-9
+                            rounded-full
+                            bg-primary
+                            text-white
+                            flex
+                            items-center
+                            justify-center
+                            font-semibold
+                        "
+                    >
+                        U
+                    </div>
+
+
+                    <div
+                        class="
+                            hidden
+                            sm:block
+                            text-left
+                        "
+                    >
+
+                        <div
+                            id="userName"
+                            class="
+                                text-sm
+                                font-semibold
+                            "
+                        >
+                            User
+                        </div>
+
+                    </div>
+
+
+                    <span
+                        id="profileArrow"
+                        class="
+                            material-symbols-outlined
+                            transition-transform
+                        "
+                    >
+                        expand_more
+                    </span>
+
+                </button>
+
+
+                <!-- Profile Dropdown -->
+
+                <div
+                    id="profileDropdown"
+                    class="
+                        hidden
+                        absolute
+                        right-0
+                        top-full
+                        mt-2
+                        w-64
+                        bg-white
+                        border
+                        border-outline-variant
+                        rounded-xl
+                        shadow-xl
+                        z-50
+                        overflow-hidden
+                    "
+                >
+
+                    <div
+                        class="
+                            px-5
+                            py-4
+                            border-b
+                            border-outline-variant
+                        "
+                    >
+
+                        <div
+                            id="dropdownUserName"
+                            class="
+                                font-semibold
+                            "
+                        >
+                            User
+                        </div>
+
+
+                        <div
+                            id="dropdownUserEmail"
+                            class="
+                                text-sm
+                                text-on-surface-variant
+                                mt-1
+                            "
+                        >
+                            User account
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        id="signOutBtn"
+                        type="button"
+                        class="
+                            w-full
+                            flex
+                            items-center
+                            gap-3
+                            px-5
+                            py-3
+                            text-left
+                            text-red-600
+                            hover:bg-red-50
+                            transition
+                        "
+                    >
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                            "
+                        >
+                            logout
+                        </span>
+
+                        Sign Out
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- =============================================
+             PAGE CONTENT
+        ============================================== -->
+
+        <div
+            class="
+                flex-1
+                overflow-y-auto
+                px-6
+                lg:px-10
+                py-8
+            "
+        >
+
+
+            <!-- =========================================
+                 LOADING STATE
+            ========================================== -->
+
+            <div
+                id="loadingState"
+                class="
+                    min-h-[400px]
+                    flex
+                    flex-col
+                    items-center
+                    justify-center
+                "
+            >
+
+                <span
+                    class="
+                        material-symbols-outlined
+                        text-4xl
+                        text-primary
+                        animate-spin
+                    "
+                >
+                    progress_activity
+                </span>
+
+
+                <p
+                    class="
+                        mt-4
+                        text-on-surface-variant
+                    "
+                >
+                    Loading project...
+                </p>
+
+            </div>
+
+
+            <!-- =========================================
+                 ERROR STATE
+            ========================================== -->
+
+            <div
+                id="errorState"
+                class="hidden"
+            >
+
+                <div
+                    class="
+                        max-w-2xl
+                        mx-auto
+                        mt-10
+                        bg-red-50
+                        border
+                        border-red-200
+                        rounded-xl
+                        p-6
+                    "
+                >
+
+                    <div
+                        class="
+                            flex
+                            items-start
+                            gap-4
+                        "
+                    >
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-red-600
+                            "
+                        >
+                            error
+                        </span>
+
+
+                        <div>
+
+                            <h2
+                                class="
+                                    font-semibold
+                                    text-red-800
+                                "
+                            >
+                                Something went wrong
+                            </h2>
+
+
+                            <p
+                                id="errorMessage"
+                                class="
+                                    mt-2
+                                    text-sm
+                                    text-red-700
+                                "
+                            >
+                                Unable to load project.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 PROJECT CONTENT
+            ========================================== -->
+
+            <div
+                id="projectContent"
+                class="hidden max-w-7xl mx-auto"
+            >
+
+
+                <!-- =====================================
+                     PROJECT HEADER
+                ====================================== -->
+
+                <section
+                    class="
+                        bg-white
+                        border
+                        border-outline-variant
+                        rounded-2xl
+                        p-6
+                        lg:p-8
+                    "
+                >
+
+                    <div
+                        class="
+                            flex
+                            flex-col
+                            lg:flex-row
+                            lg:items-center
+                            lg:justify-between
+                            gap-5
+                        "
+                    >
+
+                        <div>
+
+                            <div
+                                class="
+                                    flex
+                                    flex-wrap
+                                    items-center
+                                    gap-3
+                                "
+                            >
+
+                                <h2
+                                    class="
+                                        text-2xl
+                                        lg:text-3xl
+                                        font-bold
+                                        font-headline
+                                    "
+                                >
+                                    Project Details
+                                </h2>
+
+
+                                <span
+                                    id="projectIdText"
+                                    class="
+                                        text-xs
+                                        px-3
+                                        py-1
+                                        rounded-full
+                                        bg-surface-container-low
+                                        text-on-surface-variant
+                                    "
+                                >
+                                </span>
+
+                            </div>
+
+
+                            <p
+                                id="projectShortDescription"
+                                class="
+                                    mt-3
+                                    max-w-3xl
+                                    text-on-surface-variant
+                                    leading-7
+                                "
+                            >
+                                No business objective provided.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =====================================
+                     TABS
+                ====================================== -->
+
+                <div
+                    class="
+                        mt-8
+                        border-b
+                        border-outline-variant
+                    "
+                >
+
+                    <div
+                        class="
+                            flex
+                            gap-6
+                            overflow-x-auto
+                        "
+                    >
+
+                        <button
+                            type="button"
+                            data-tab="description"
+                            class="
+                                tab-button
+                                py-4
+                                border-b-2
+                                border-primary
+                                text-primary
+                                font-semibold
+                                whitespace-nowrap
+                            "
+                        >
+                            Description
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-tab="prd"
+                            class="
+                                tab-button
+                                py-4
+                                border-b-2
+                                border-transparent
+                                text-on-surface-variant
+                                whitespace-nowrap
+                            "
+                        >
+                            PRD
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-tab="tasks"
+                            class="
+                                tab-button
+                                py-4
+                                border-b-2
+                                border-transparent
+                                text-on-surface-variant
+                                whitespace-nowrap
+                            "
+                        >
+                            Tasks
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-tab="sprint"
+                            class="
+                                tab-button
+                                py-4
+                                border-b-2
+                                border-transparent
+                                text-on-surface-variant
+                                whitespace-nowrap
+                            "
+                        >
+                            Sprint Plan
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =====================================
+                     DESCRIPTION TAB
+                ====================================== -->
+
+                <section
+                    id="descriptionTab"
+                    class="py-8"
+                >
+
+                    <!-- Section Header -->
+
+                    <div
+                        class="
+                            flex
+                            flex-col
+                            sm:flex-row
+                            sm:items-center
+                            sm:justify-between
+                            gap-4
+                            mb-6
+                        "
+                    >
+
+                        <div>
+
+                            <h2
+                                class="
+                                    text-2xl
+                                    font-bold
+                                    font-headline
+                                "
+                            >
+                                Project Description
+                            </h2>
+
+
+                            <p
+                                class="
+                                    mt-1
+                                    text-sm
+                                    text-on-surface-variant
+                                "
+                            >
+                                Compare your original project
+                                information with the AI-generated
+                                description.
+                            </p>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                flex
+                                items-center
+                                gap-4
+                            "
+                        >
+
+                            <span
+                                id="descriptionStatus"
+                                class="
+                                    generation-status
+                                    text-on-surface-variant
+                                "
+                            >
+                                Not generated yet
+                            </span>
+
+
+                            <button
+                                id="generateDescriptionButton"
+                                type="button"
+                                class="
+                                    generate-stage-button
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                    "
+                                >
+                                    auto_awesome
+                                </span>
+
+                                Generate Description
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Original Project Information -->
+
+                    <div class="mb-10">
+
+                        <div class="mb-4">
+
+                            <h3
+                                class="
+                                    text-lg
+                                    font-bold
+                                    font-headline
+                                "
+                            >
+                                Original Project Information
+                            </h3>
+
+
+                            <p
+                                class="
+                                    mt-1
+                                    text-sm
+                                    text-on-surface-variant
+                                "
+                            >
+                                Information entered by you when
+                                the project was created.
+                            </p>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                grid
+                                grid-cols-1
+                                md:grid-cols-2
+                                gap-4
+                            "
+                        >
+
+                            <div class="original-card">
+
+                                <div
+                                    class="original-label"
+                                >
+                                    Business Objective
+                                </div>
+
+                                <div
+                                    id="originalBusinessObjective"
+                                    class="original-value"
+                                >
+                                    Not available.
+                                </div>
+
+                            </div>
+
+
+                            <div class="original-card">
+
+                                <div
+                                    class="original-label"
+                                >
+                                    Target Users
+                                </div>
+
+                                <div
+                                    id="originalTargetUsers"
+                                    class="original-value"
+                                >
+                                    Not available.
+                                </div>
+
+                            </div>
+
+
+                            <div class="original-card">
+
+                                <div
+                                    class="original-label"
+                                >
+                                    Problem Statement
+                                </div>
+
+                                <div
+                                    id="originalProblemStatement"
+                                    class="original-value"
+                                >
+                                    Not available.
+                                </div>
+
+                            </div>
+
+
+                            <div class="original-card">
+
+                                <div
+                                    class="original-label"
+                                >
+                                    Expected Features
+                                </div>
+
+                                <div
+                                    id="originalExpectedFeatures"
+                                    class="original-value"
+                                >
+                                    Not available.
+                                </div>
+
+                            </div>
+
+
+                            <div class="original-card">
+
+                                <div
+                                    class="original-label"
+                                >
+                                    Technology Preferences
+                                </div>
+
+                                <div
+                                    id="originalTechnologyPreferences"
+                                    class="original-value"
+                                >
+                                    Not available.
+                                </div>
+
+                            </div>
+
+
+                            <div class="original-card">
+
+                                <div
+                                    class="original-label"
+                                >
+                                    Timeline
+                                </div>
+
+                                <div
+                                    id="originalTimeline"
+                                    class="original-value"
+                                >
+                                    Not available.
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    original-card
+                                    md:col-span-2
+                                "
+                            >
+
+                                <div
+                                    class="original-label"
+                                >
+                                    Additional Instructions
+                                </div>
+
+                                <div
+                                    id="originalAdditionalInstructions"
+                                    class="original-value"
+                                >
+                                    Not available.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- AI Description -->
+
+                    <div>
+
+                        <div class="mb-4">
+
+                            <h3
+                                class="
+                                    text-lg
+                                    font-bold
+                                    font-headline
+                                "
+                            >
+                                AI Generated Description
+                            </h3>
+
+
+                            <p
+                                class="
+                                    mt-1
+                                    text-sm
+                                    text-on-surface-variant
+                                "
+                            >
+                                Generated from the original
+                                project information.
+                            </p>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                grid
+                                grid-cols-1
+                                lg:grid-cols-2
+                                gap-5
+                            "
+                        >
+
+                            <!-- Overview -->
+
+                            <article
+                                class="content-card lg:col-span-2"
+                            >
+
+                                <div class="card-header">
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-primary
+                                        "
+                                    >
+                                        overview
+                                    </span>
+
+
+                                    <h3
+                                        class="
+                                            font-semibold
+                                        "
+                                    >
+                                        Overview
+                                    </h3>
+
+                                </div>
+
+
+                                <div
+                                    id="overviewContent"
+                                    class="content-text"
+                                >
+                                    <div class="empty-content">
+                                        Content not generated yet.
+                                    </div>
+                                </div>
+
+                            </article>
+
+
+                            <!-- Problem -->
+
+                            <article
+                                class="content-card"
+                            >
+
+                                <div class="card-header">
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-primary
+                                        "
+                                    >
+                                        report_problem
+                                    </span>
+
+
+                                    <h3
+                                        class="
+                                            font-semibold
+                                        "
+                                    >
+                                        Problem Statement
+                                    </h3>
+
+                                </div>
+
+
+                                <div
+                                    id="problemStatementContent"
+                                    class="content-text"
+                                >
+                                    <div class="empty-content">
+                                        Content not generated yet.
+                                    </div>
+                                </div>
+
+                            </article>
+
+
+                            <!-- Solution -->
+
+                            <article
+                                class="content-card"
+                            >
+
+                                <div class="card-header">
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-primary
+                                        "
+                                    >
+                                        lightbulb
+                                    </span>
+
+
+                                    <h3
+                                        class="
+                                            font-semibold
+                                        "
+                                    >
+                                        Proposed Solution
+                                    </h3>
+
+                                </div>
+
+
+                                <div
+                                    id="solutionContent"
+                                    class="content-text"
+                                >
+                                    <div class="empty-content">
+                                        Content not generated yet.
+                                    </div>
+                                </div>
+
+                            </article>
+
+
+                            <!-- Target Audience -->
+
+                            <article
+                                class="content-card"
+                            >
+
+                                <div class="card-header">
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-primary
+                                        "
+                                    >
+                                        groups
+                                    </span>
+
+
+                                    <h3
+                                        class="
+                                            font-semibold
+                                        "
+                                    >
+                                        Target Audience
+                                    </h3>
+
+                                </div>
+
+
+                                <div
+                                    id="targetAudienceContent"
+                                    class="content-text"
+                                >
+                                    <div class="empty-content">
+                                        Content not generated yet.
+                                    </div>
+                                </div>
+
+                            </article>
+
+
+                            <!-- Business Value -->
+
+                            <article
+                                class="content-card"
+                            >
+
+                                <div class="card-header">
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-primary
+                                        "
+                                    >
+                                        trending_up
+                                    </span>
+
+
+                                    <h3
+                                        class="
+                                            font-semibold
+                                        "
+                                    >
+                                        Business Value
+                                    </h3>
+
+                                </div>
+
+
+                                <div
+                                    id="businessValueContent"
+                                    class="content-text"
+                                >
+                                    <div class="empty-content">
+                                        Content not generated yet.
+                                    </div>
+                                </div>
+
+                            </article>
+
+
+                            <!-- Major Features -->
+
+                            <article
+                                class="content-card lg:col-span-2"
+                            >
+
+                                <div class="card-header">
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-primary
+                                        "
+                                    >
+                                        feature_search
+                                    </span>
+
+
+                                    <h3
+                                        class="
+                                            font-semibold
+                                        "
+                                    >
+                                        Major Features
+                                    </h3>
+
+                                </div>
+
+
+                                <div
+                                    id="majorFeaturesContent"
+                                    class="content-text"
+                                >
+                                    <div class="empty-content">
+                                        Content not generated yet.
+                                    </div>
+                                </div>
+
+                            </article>
+
+
+                            <!-- Expected Outcome -->
+
+                            <article
+                                class="content-card lg:col-span-2"
+                            >
+
+                                <div class="card-header">
+
+                                    <span
+                                        class="
+                                            material-symbols-outlined
+                                            text-primary
+                                        "
+                                    >
+                                        task_alt
+                                    </span>
+
+
+                                    <h3
+                                        class="
+                                            font-semibold
+                                        "
+                                    >
+                                        Expected Outcome
+                                    </h3>
+
+                                </div>
+
+
+                                <div
+                                    id="expectedOutcomeContent"
+                                    class="content-text"
+                                >
+                                    <div class="empty-content">
+                                        Content not generated yet.
+                                    </div>
+                                </div>
+
+                            </article>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =====================================
+                     PRD TAB
+                ====================================== -->
+
+                <section
+                    id="prdTab"
+                    class="hidden py-8"
+                >
+
+                    <div
+                        class="
+                            flex
+                            flex-col
+                            sm:flex-row
+                            sm:items-center
+                            sm:justify-between
+                            gap-4
+                            mb-6
+                        "
+                    >
+
+                        <div>
+
+                            <h2
+                                class="
+                                    text-2xl
+                                    font-bold
+                                    font-headline
+                                "
+                            >
+                                Product Requirements Document
+                            </h2>
+
+
+                            <p
+                                class="
+                                    mt-1
+                                    text-sm
+                                    text-on-surface-variant
+                                "
+                            >
+                                Generate the PRD from the
+                                approved project description.
+                            </p>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                flex
+                                items-center
+                                gap-4
+                            "
+                        >
+
+                            <span
+                                id="prdStatus"
+                                class="
+                                    generation-status
+                                    text-on-surface-variant
+                                "
+                            >
+                                Not generated yet
+                            </span>
+
+
+                            <button
+                                id="generatePRDButton"
+                                type="button"
+                                class="
+                                    generate-stage-button
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                    "
+                                >
+                                    auto_awesome
+                                </span>
+
+                                Generate PRD
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            grid
+                            grid-cols-1
+                            lg:grid-cols-2
+                            gap-5
+                        "
+                    >
+
+                        <!-- Product Overview -->
+
+                        <article
+                            class="content-card lg:col-span-2"
+                        >
+
+                            <div class="card-header">
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-primary
+                                    "
+                                >
+                                    description
+                                </span>
+
+
+                                <h3
+                                    class="
+                                        font-semibold
+                                    "
+                                >
+                                    Product Overview
+                                </h3>
+
+                            </div>
+
+
+                            <div
+                                id="prdProductOverview"
+                                class="content-text"
+                            >
+                                <div class="empty-content">
+                                    Content not generated yet.
+                                </div>
+                            </div>
+
+                        </article>
+
+
+                        <!-- Goals -->
+
+                        <article
+                            class="content-card"
+                        >
+
+                            <div class="card-header">
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-primary
+                                    "
+                                >
+                                    flag
+                                </span>
+
+
+                                <h3
+                                    class="
+                                        font-semibold
+                                    "
+                                >
+                                    Goals and Objectives
+                                </h3>
+
+                            </div>
+
+
+                            <div
+                                id="prdGoals"
+                                class="content-text"
+                            >
+                                <div class="empty-content">
+                                    Content not generated yet.
+                                </div>
+                            </div>
+
+                        </article>
+
+
+                        <!-- Target Users -->
+
+                        <article
+                            class="content-card"
+                        >
+
+                            <div class="card-header">
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-primary
+                                    "
+                                >
+                                    groups
+                                </span>
+
+
+                                <h3
+                                    class="
+                                        font-semibold
+                                    "
+                                >
+                                    Target Users
+                                </h3>
+
+                            </div>
+
+
+                            <div
+                                id="prdTargetUsers"
+                                class="content-text"
+                            >
+                                <div class="empty-content">
+                                    Content not generated yet.
+                                </div>
+                            </div>
+
+                        </article>
+
+
+                        <!-- Functional Requirements -->
+
+                        <article
+                            class="content-card lg:col-span-2"
+                        >
+
+                            <div class="card-header">
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-primary
+                                    "
+                                >
+                                    checklist
+                                </span>
+
+
+                                <h3
+                                    class="
+                                        font-semibold
+                                    "
+                                >
+                                    Functional Requirements
+                                </h3>
+
+                            </div>
+
+
+                            <div
+                                id="prdFunctionalRequirements"
+                                class="content-text"
+                            >
+                                <div class="empty-content">
+                                    Content not generated yet.
+                                </div>
+                            </div>
+
+                        </article>
+
+
+                        <!-- User Workflows -->
+
+                        <article
+                            class="content-card"
+                        >
+
+                            <div class="card-header">
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-primary
+                                    "
+                                >
+                                    account_tree
+                                </span>
+
+
+                                <h3
+                                    class="
+                                        font-semibold
+                                    "
+                                >
+                                    User Workflows
+                                </h3>
+
+                            </div>
+
+
+                            <div
+                                id="prdUserWorkflows"
+                                class="content-text"
+                            >
+                                <div class="empty-content">
+                                    Content not generated yet.
+                                </div>
+                            </div>
+
+                        </article>
+
+
+                        <!-- Business Rules -->
+
+                        <article
+                            class="content-card"
+                        >
+
+                            <div class="card-header">
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-primary
+                                    "
+                                >
+                                    rule
+                                </span>
+
+
+                                <h3
+                                    class="
+                                        font-semibold
+                                    "
+                                >
+                                    Business Rules
+                                </h3>
+
+                            </div>
+
+
+                            <div
+                                id="prdBusinessRules"
+                                class="content-text"
+                            >
+                                <div class="empty-content">
+                                    Content not generated yet.
+                                </div>
+                            </div>
+
+                        </article>
+
+
+                        <!-- Non Functional -->
+
+                        <article
+                            class="content-card lg:col-span-2"
+                        >
+
+                            <div class="card-header">
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-primary
+                                    "
+                                >
+                                    security
+                                </span>
+
+
+                                <h3
+                                    class="
+                                        font-semibold
+                                    "
+                                >
+                                    Non-Functional Requirements
+                                </h3>
+
+                            </div>
+
+
+                            <div
+                                id="prdNonFunctionalRequirements"
+                                class="content-text"
+                            >
+                                <div class="empty-content">
+                                    Content not generated yet.
+                                </div>
+                            </div>
+
+                        </article>
+
+
+                        <!-- Assumptions -->
+
+                        <article
+                            class="content-card"
+                        >
+
+                            <div class="card-header">
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-primary
+                                    "
+                                >
+                                    info
+                                </span>
+
+
+                                <h3
+                                    class="
+                                        font-semibold
+                                    "
+                                >
+                                    Assumptions and Dependencies
+                                </h3>
+
+                            </div>
+
+
+                            <div
+                                id="prdAssumptions"
+                                class="content-text"
+                            >
+                                <div class="empty-content">
+                                    Content not generated yet.
+                                </div>
+                            </div>
+
+                        </article>
+
+
+                        <!-- Acceptance Criteria -->
+
+                        <article
+                            class="content-card"
+                        >
+
+                            <div class="card-header">
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-primary
+                                    "
+                                >
+                                    verified
+                                </span>
+
+
+                                <h3
+                                    class="
+                                        font-semibold
+                                    "
+                                >
+                                    Acceptance Criteria
+                                </h3>
+
+                            </div>
+
+
+                            <div
+                                id="prdAcceptanceCriteria"
+                                class="content-text"
+                            >
+                                <div class="empty-content">
+                                    Content not generated yet.
+                                </div>
+                            </div>
+
+                        </article>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =====================================
+                     TASKS TAB
+                ====================================== -->
+
+                <section
+                    id="tasksTab"
+                    class="hidden py-8"
+                >
+
+                    <div
+                        class="
+                            flex
+                            flex-col
+                            sm:flex-row
+                            sm:items-center
+                            sm:justify-between
+                            gap-4
+                            mb-6
+                        "
+                    >
+
+                        <div>
+
+                            <h2
+                                class="
+                                    text-2xl
+                                    font-bold
+                                    font-headline
+                                "
+                            >
+                                Project Tasks
+                            </h2>
+
+
+                            <p
+                                class="
+                                    mt-1
+                                    text-sm
+                                    text-on-surface-variant
+                                "
+                            >
+                                Generate implementation tasks
+                                from the project PRD.
+                            </p>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                flex
+                                items-center
+                                gap-4
+                            "
+                        >
+
+                            <span
+                                id="tasksStatus"
+                                class="
+                                    generation-status
+                                    text-on-surface-variant
+                                "
+                            >
+                                Not generated yet
+                            </span>
+
+
+                            <button
+                                id="generateTasksButton"
+                                type="button"
+                                class="
+                                    generate-stage-button
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                    "
+                                >
+                                    auto_awesome
+                                </span>
+
+                                Generate Tasks
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- No Tasks -->
+
+                    <div
+                        id="noTasks"
+                        class="
+                            bg-white
+                            border
+                            border-outline-variant
+                            rounded-xl
+                            p-10
+                            text-center
+                        "
+                    >
+
+                        <span
+                            class="
+                                material-symbols-outlined
+                                text-4xl
+                                text-on-surface-variant
+                            "
+                        >
+                            task
+                        </span>
+
+
+                        <h3
+                            class="
+                                mt-4
+                                font-semibold
+                            "
+                        >
+                            No tasks generated yet
+                        </h3>
+
+
+                        <p
+                            class="
+                                mt-2
+                                text-sm
+                                text-on-surface-variant
+                            "
+                        >
+                            Generate the PRD first, then
+                            generate implementation tasks.
+                        </p>
+
+                    </div>
+
+
+                    <!-- Tasks Container -->
+
+                    <div
+                        id="tasksContainer"
+                        class="
+                            space-y-5
+                        "
+                    >
+                    </div>
+
+                </section>
+
+
+                <!-- =====================================
+                     SPRINT TAB
+                ====================================== -->
+
+                <section
+                    id="sprintTab"
+                    class="hidden py-8"
+                >
+
+                    <div
+                        class="
+                            flex
+                            flex-col
+                            sm:flex-row
+                            sm:items-center
+                            sm:justify-between
+                            gap-4
+                            mb-6
+                        "
+                    >
+
+                        <div>
+
+                            <h2
+                                class="
+                                    text-2xl
+                                    font-bold
+                                    font-headline
+                                "
+                            >
+                                Sprint Plan
+                            </h2>
+
+
+                            <p
+                                class="
+                                    mt-1
+                                    text-sm
+                                    text-on-surface-variant
+                                "
+                            >
+                                Organize generated tasks into
+                                a practical development sequence.
+                            </p>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                flex
+                                items-center
+                                gap-4
+                            "
+                        >
+
+                            <span
+                                id="sprintStatus"
+                                class="
+                                    generation-status
+                                    text-on-surface-variant
+                                "
+                            >
+                                Not generated yet
+                            </span>
+
+
+                            <button
+                                id="generateSprintButton"
+                                type="button"
+                                class="
+                                    generate-stage-button
+                                "
+                            >
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                    "
+                                >
+                                    auto_awesome
+                                </span>
+
+                                Generate Sprint Plan
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <article
+                        class="
+                            content-card
+                        "
+                    >
+
+                        <div
+                            class="card-header"
+                        >
+
+                            <span
+                                class="
+                                    material-symbols-outlined
+                                    text-primary
+                                "
+                            >
+                                calendar_month
+                            </span>
+
+
+                            <h3
+                                class="
+                                    font-semibold
+                                "
+                            >
+                                Development Sprint Plan
+                            </h3>
+
+                        </div>
+
+
+                        <div
+                            id="sprintContent"
+                            class="content-text"
+                        >
+
+                            <div class="empty-content">
+                                Content not generated yet.
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </section>
+
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     AUTH
+====================================================== -->
+
+<script
+    type="module"
+    src="../js/auth.js"
+></script>
+
+
+<!-- =====================================================
+     PROJECT DETAILS CONTROLLER
+====================================================== -->
+
+<script
+    type="module"
+    src="../js/project-details/project-details.js"
+></script>
