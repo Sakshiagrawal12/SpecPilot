@@ -1,17 +1,16 @@
 console.log("🔥 PROJECT DETAILS CONTROLLER LOADED 🔥");
-
+const API_URL = "http://127.0.0.1:8000";
 import { loadUserProfile, setupUserProfile } from "./profile.js";
 import { renderDescription } from "./description.js";
 import { renderPRD } from "./prd.js";
 import { displayTasks } from "./tasks.js";
 import { renderSprint } from "./sprint.js";
 import { parseJSONIfPossible } from "./utils.js";
-
 // =========================================================
 // CONFIGURATION
 // =========================================================
 
-const API_URL = "http://127.0.0.1:8000";
+
 
 let currentProject = null;
 let generatedContent = null;
@@ -177,7 +176,7 @@ try {
 
     currentProject = project;
 
-
+    renderSavedPRD(project);
     // -------------------------------------------------
     // DISPLAY ORIGINAL PROJECT DATA
     // -------------------------------------------------
@@ -529,37 +528,6 @@ if (
 
 
 // -----------------------------------------------------
-// AI PRD
-// -----------------------------------------------------
-
-const aiPRD =
-    data.prd;
-
-
-if (
-    aiPRD &&
-    typeof aiPRD === "object"
-) {
-
-    console.log(
-        "Rendering AI PRD:",
-        aiPRD
-    );
-
-
-    renderPRD(
-        aiPRD
-    );
-
-
-    setStatus(
-        "prdStatus",
-        "Generated"
-    );
-}
-
-
-// -----------------------------------------------------
 // AI TASKS
 // -----------------------------------------------------
 
@@ -647,83 +615,119 @@ if (aiSprintPlan) {
 
 function setupButtons() {
 
-const descriptionButton =
-    document.getElementById(
-        "generateDescriptionButton"
-    );
+    const descriptionButton =
+        document.getElementById(
+            "generateDescriptionButton"
+        );
 
 
-const prdButton =
-    document.getElementById(
-        "generatePRDButton"
-    );
+    const tasksButton =
+        document.getElementById(
+            "generateTasksButton"
+        );
 
 
-const tasksButton =
-    document.getElementById(
-        "generateTasksButton"
-    );
+    const sprintButton =
+        document.getElementById(
+            "generateSprintButton"
+        );
 
 
-const sprintButton =
-    document.getElementById(
-        "generateSprintButton"
-    );
+    // -----------------------------------------------------
+    // DESCRIPTION
+    // -----------------------------------------------------
+
+    if (descriptionButton) {
+
+        descriptionButton.addEventListener(
+            "click",
+            generateDescription
+        );
+    }
 
 
-// -----------------------------------------------------
-// DESCRIPTION
-// -----------------------------------------------------
+    // -----------------------------------------------------
+    // TASKS
+    // -----------------------------------------------------
 
-if (descriptionButton) {
+    if (tasksButton) {
 
-    descriptionButton.addEventListener(
-        "click",
-        generateDescription
-    );
+        tasksButton.addEventListener(
+            "click",
+            generateTasks
+        );
+    }
+
+
+    // -----------------------------------------------------
+    // SPRINT
+    // -----------------------------------------------------
+
+    if (sprintButton) {
+
+        sprintButton.addEventListener(
+            "click",
+            generateSprint
+        );
+    }
+
+
+    // -----------------------------------------------------
+    // DOWNLOAD PRD
+    // -----------------------------------------------------
+   const downloadPrdButton = document.getElementById("downloadPrdButton");
+const downloadPrdMenu = document.getElementById("downloadPrdMenu");
+const downloadPrdPdfOption = document.getElementById("downloadPrdPdfOption");
+const downloadPrdDocxOption = document.getElementById("downloadPrdDocxOption");
+
+if (downloadPrdButton && downloadPrdMenu) {
+
+    downloadPrdButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        downloadPrdMenu.classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", () => {
+        downloadPrdMenu.classList.add("hidden");
+    });
+
+    downloadPrdMenu.addEventListener("click", (event) => {
+        event.stopPropagation();
+    });
 }
 
-
-// -----------------------------------------------------
-// PRD
-// -----------------------------------------------------
-
-if (prdButton) {
-
-    prdButton.addEventListener(
-        "click",
-        generatePRD
-    );
+if (downloadPrdPdfOption) {
+    downloadPrdPdfOption.addEventListener("click", () => {
+        downloadPrdMenu.classList.add("hidden");
+        downloadPRD("pdf");
+    });
 }
 
-
-// -----------------------------------------------------
-// TASKS
-// -----------------------------------------------------
-
-if (tasksButton) {
-
-    tasksButton.addEventListener(
-        "click",
-        generateTasks
-    );
+if (downloadPrdDocxOption) {
+    downloadPrdDocxOption.addEventListener("click", () => {
+        downloadPrdMenu.classList.add("hidden");
+        downloadPRD("docx");
+    });
 }
+  // -----------------------------------------------------
+    // GENERATE PRD
+    // -----------------------------------------------------
+
+    const generatePrdButton =
+        document.getElementById(
+            "generatePrdButton"
+        );
 
 
-// -----------------------------------------------------
-// SPRINT
-// -----------------------------------------------------
+    if (generatePrdButton) {
 
-if (sprintButton) {
-
-    sprintButton.addEventListener(
-        "click",
-        generateSprint
-    );
-}
+        generatePrdButton.addEventListener(
+            "click",
+            generatePRD
+        );
+    }
 
 }
-
 // =========================================================
 // GENERATE DESCRIPTION
 // =========================================================
@@ -986,164 +990,256 @@ try {
 }
 
 }
-
-// =========================================================
-// GENERATE PRD
-// =========================================================
-
 async function generatePRD() {
 
-const projectId =
-    currentProject?.id ||
-    getProjectId();
+    const projectId = currentProject?.id || getProjectId();
+    const accessToken = getAccessToken();
 
-const accessToken =
-    getAccessToken();
-
-
-if (!projectId || !accessToken) {
-
-    showError(
-        "Project information or authentication is missing."
-    );
-
-    return;
-}
-
-
-const button =
-    document.getElementById(
-        "generatePRDButton"
-    );
-
-
-const status =
-    document.getElementById(
-        "prdStatus"
-    );
-
-
-try {
-
-    if (button) {
-
-        button.disabled = true;
-
-        button.innerHTML = `
-            <span class="material-symbols-outlined animate-spin text-[18px]">
-                progress_activity
-            </span>
-            Generating...
-        `;
+    if (!projectId || !accessToken) {
+        showError("Project information or authentication is missing.");
+        return;
     }
 
+    const button = document.getElementById("generatePrdButton");
+    const status = document.getElementById("prdStatus");
 
-    if (status) {
+    try {
 
-        status.textContent =
-            "Generating PRD...";
-    }
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = `
+                <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                Generating...
+            `;
+        }
 
+        if (status) status.textContent = "Generating PRD...";
 
-    const response =
-        await fetch(
+        const response = await fetch(
             `${API_URL}/ai/generate-prd/${projectId}`,
             {
                 method: "POST",
-
                 headers: {
-                    "Authorization":
-                        `Bearer ${accessToken}`,
-
-                    "Content-Type":
-                        "application/json"
+                    "Authorization": `Bearer ${accessToken}`,
+                    "Content-Type": "application/json"
                 }
             }
         );
 
+        const text = await response.text();
+        let data;
 
-    const text =
-        await response.text();
+        try {
+            data = JSON.parse(text);
+        } catch {
+            throw new Error(text || "Invalid response from PRD API.");
+        }
 
+        if (!response.ok) {
+            throw new Error(data.detail || data.message || "PRD generation failed.");
+        }
 
-    let data;
+        console.log("PRD GENERATED:", data);
 
+        if (!data.prd || typeof data.prd !== "object") {
+            throw new Error("Backend did not return a valid PRD.");
+        }
+
+        renderPRD(data.prd);
+        setStatus("prdStatus", "Generated");
+
+    } catch (error) {
+
+        console.error("PRD GENERATION ERROR:", error);
+
+        if (status) {
+            status.textContent = error.message || "Something went wrong while generating the PRD.";
+        }
+
+    } finally {
+
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = `
+                <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+                Generate PRD
+            `;
+        }
+    }
+}
+
+// =========================================================
+// Download PRD
+// =========================================================
+async function downloadPRD(format) {
+
+    const projectId = currentProject?.id || getProjectId();
+    const accessToken = getAccessToken();
+
+    if (!projectId || !accessToken) {
+        showError("Project information or authentication is missing.");
+        return;
+    }
+
+    const buttonId = format === "docx"
+        ? "downloadPrdDocxButton"
+        : "downloadPrdPdfButton";
+
+    const button = document.getElementById(buttonId);
 
     try {
 
-        data =
-            JSON.parse(text);
+        if (button) {
+            button.disabled = true;
+            button.innerHTML = `
+                <span class="material-symbols-outlined animate-spin">progress_activity</span>
+                <span>Preparing...</span>
+            `;
+        }
 
-    } catch {
-
-        throw new Error(
-            text ||
-            "Invalid response from PRD API."
+        const response = await fetch(
+            `${API_URL}/projects/${projectId}/download-prd?format=${format}`,
+            {
+                method: "GET",
+                headers: { "Authorization": `Bearer ${accessToken}` }
+            }
         );
+
+        if (!response.ok) {
+
+            let errorMessage = "Failed to download PRD.";
+
+            try {
+                const data = await response.json();
+                errorMessage = data.detail || data.message || errorMessage;
+            } catch {
+                // ignore
+            }
+
+            throw new Error(errorMessage);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = `${currentProject?.project_name || "project"}-PRD.${format}`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+
+        console.error("PRD DOWNLOAD ERROR:", error);
+        showError(error.message || "Failed to download PRD.");
+
+    } finally {
+
+        if (button) {
+            button.disabled = false;
+
+            const label = format === "docx" ? "Download DOCX" : "Download PDF";
+
+            button.innerHTML = `
+                <span class="material-symbols-outlined">download</span>
+                <span>${label}</span>
+            `;
+        }
     }
+}
 
-
-    if (!response.ok) {
-
-        throw new Error(
-            data.detail ||
-            data.message ||
-            "PRD generation failed."
-        );
-    }
-
+function renderSavedPRD(project) {
 
     console.log(
-        "PRD GENERATED:",
-        data
+        "================================="
+    );
+
+    console.log(
+        "RENDERING SAVED PRD"
+    );
+
+    console.log(
+        "================================="
     );
 
 
-    if (
-        data.prd &&
-        typeof data.prd === "object"
-    ) {
+    const prd = {
 
-        renderPRD(
-            data.prd
+        product_overview:
+            project.product_overview || "",
+
+        problem_statement:
+            project.prd_problem_statement || "",
+
+        goals_and_objectives:
+            project.goals_and_objectives || "",
+
+        target_users:
+            project.prd_target_users || "",
+
+        functional_requirements:
+            project.functional_requirements || "",
+
+        user_workflows:
+            project.user_workflows || "",
+
+        business_rules:
+            project.business_rules || "",
+
+        non_functional_requirements:
+            project.non_functional_requirements || "",
+
+        assumptions_and_dependencies:
+            project.assumptions_and_dependencies || "",
+
+        acceptance_criteria:
+            project.acceptance_criteria || ""
+    };
+
+
+    const hasPRD =
+        Object.values(prd).some(
+            value =>
+                value !== null &&
+                value !== undefined &&
+                String(value).trim() !== ""
+        );
+
+
+    if (!hasPRD) {
+
+        console.log(
+            "No saved PRD found."
         );
 
         setStatus(
             "prdStatus",
-            "Generated"
+            "Not generated yet"
         );
+
+        return;
     }
 
 
-} catch (error) {
-
-    console.error(
-        "PRD GENERATION ERROR:",
-        error
+    console.log(
+        "SAVED PRD:",
+        prd
     );
 
 
-    if (status) {
+    renderPRD(
+        prd
+    );
 
-        status.textContent =
-            error.message ||
-            "Failed to generate PRD.";
-    }
 
-} finally {
-
-    if (button) {
-
-        button.disabled = false;
-
-        button.innerHTML = `
-            <span class="material-symbols-outlined text-[18px]">
-                auto_awesome
-            </span>
-            Generate PRD
-        `;
-    }
-}
+    setStatus(
+        "prdStatus",
+        "Generated"
+    );
 
 }
 

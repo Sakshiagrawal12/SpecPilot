@@ -492,141 +492,100 @@
          NAVIGATION
     ============================================== -->
 
-    <nav
-        class="
-            flex-1
-            px-4
-            space-y-1
-        "
-    >
+    <nav class="flex-1 px-unit-md space-y-1">
+    <a
+                href="dashboard.html"
+                class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
+            >
 
-        <!-- Dashboard -->
+                <span
+                    class="material-symbols-outlined text-outline group-hover:text-primary transition-colors"
+                >
+                    dashboard
+                </span>
+
+                <span class="font-label-md text-label-md">
+                    Dashboard
+                </span>
+
+            </a>
+    
+
+        
+
 
         <a
-            href="dashboard.html"
-            class="
-                flex
-                items-center
-                gap-3
-                px-4
-                py-3
-                rounded-lg
-                text-on-surface-variant
-                hover:bg-surface-container-low
-                transition
-            "
+                href="project-details.html"
+                class="flex items-center gap-3 bg-secondary-container text-on-secondary-container rounded-lg px-4 py-3 border-l-4 border-primary transition-colors duration-200 shadow-sm relative overflow-hidden group"
+             >
+
+                <span
+                    class="material-symbols-outlined text-outline group-hover:text-primary transition-colors"
+                >
+                    folder_open
+                </span>
+
+                <span class="font-label-md text-label-md">
+                    Projects
+                </span>
+
+            </a>
+
+
+        <a
+            class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
+         
+              href="agent.html"
         >
 
-            <span
-                class="
-                    material-symbols-outlined
-                "
-            >
-                dashboard
+            <span class="material-symbols-outlined">
+                smart_toy
             </span>
 
-            <span>
-                Dashboard
+            <span class="font-label-md text-label-md">
+                SpecPilot Agent
             </span>
 
         </a>
 
 
-        <!-- Projects -->
-
         <a
-            href="dashboard.html"
-            class="
-                flex
-                items-center
-                gap-3
-                px-4
-                py-3
-                rounded-lg
-                bg-primary-container
-                text-primary
-                font-semibold
-                transition
-            "
-        >
-
-            <span
-                class="
-                    material-symbols-outlined
-                "
+                href="feedback.html"
+                class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
             >
-                folder
-            </span>
 
-            <span>
-                Projects
-            </span>
+                <span
+                    class="material-symbols-outlined text-outline group-hover:text-primary transition-colors"
+                >
+                    feedback
+                </span>
 
-        </a>
+                <span class="font-label-md text-label-md">
+                    Feedback
+                </span>
+
+            </a>
 
 
-        <!-- Feedback -->
 
-        <a
-            href="feedback.html"
-            class="
-                flex
-                items-center
-                gap-3
-                px-4
-                py-3
-                rounded-lg
-                text-on-surface-variant
-                hover:bg-surface-container-low
-                transition
-            "
-        >
+            <!-- Settings -->
 
-            <span
-                class="
-                    material-symbols-outlined
-                "
+            <a
+                href="#"
+                class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
             >
-                rate_review
-            </span>
 
-            <span>
-                Feedback
-            </span>
+                <span
+                    class="material-symbols-outlined text-outline group-hover:text-primary transition-colors"
+                >
+                    settings
+                </span>
 
-        </a>
+                <span class="font-label-md text-label-md">
+                    Settings
+                </span>
 
-
-        <!-- Settings -->
-
-        <a
-            href="settings.html"
-            class="
-                flex
-                items-center
-                gap-3
-                px-4
-                py-3
-                rounded-lg
-                text-on-surface-variant
-                hover:bg-surface-container-low
-                transition
-            "
-        >
-
-            <span
-                class="
-                    material-symbols-outlined
-                "
-            >
-                settings
-            </span>
-
-            <span>
-                Settings
-            </span>
-
-        </a>
+            </a>
 
     </nav>
 
@@ -1897,16 +1856,9 @@
                             </h2>
 
 
-                            <p
-                                class="
-                                    mt-1
-                                    text-sm
-                                    text-on-surface-variant
-                                "
-                            >
-                                Generate the PRD from the
-                                approved project description.
-                            </p>
+                          <p
+                           class=" mt-1 text-sm text-on-surface-variant " >
+                            View the PRD generated from the approved project requirements. </p>
 
                         </div>
 
@@ -1929,28 +1881,58 @@
                                 Not generated yet
                             </span>
 
+                            <div class="flex items-center gap-3">
 
-                            <button
-                                id="generatePRDButton"
-                                type="button"
-                                class="
-                                    generate-stage-button
-                                "
-                            >
+    <button
+        type="button"
+        id="generatePrdButton"
+        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-on-primary hover:opacity-90 transition-colors"
+    >
+        <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+        <span>Generate PRD</span>
+    </button>
 
-                                <span
-                                    class="
-                                        material-symbols-outlined
-                                    "
-                                >
-                                    auto_awesome
-                                </span>
+    <div class="relative">
 
-                                Generate PRD
+        <button
+            type="button"
+            id="downloadPrdButton"
+            class="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors"
+        >
+            <span class="material-symbols-outlined">download</span>
+            <span>Download PRD</span>
+            <span class="material-symbols-outlined text-[18px]">arrow_drop_down</span>
+        </button>
 
-                            </button>
+        <div
+            id="downloadPrdMenu"
+            class="hidden absolute right-0 mt-2 w-40 rounded-lg border border-outline-variant bg-surface shadow-lg z-10"
+        >
+            <button
+                type="button"
+                id="downloadPrdPdfOption"
+                class="w-full text-left px-4 py-2 hover:bg-surface-container transition-colors flex items-center gap-2"
+            >
+                <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+                PDF
+            </button>
+
+            <button
+                type="button"
+                id="downloadPrdDocxOption"
+                class="w-full text-left px-4 py-2 hover:bg-surface-container transition-colors flex items-center gap-2"
+            >
+                <span class="material-symbols-outlined text-[18px]">description</span>
+                DOCX
+            </button>
+        </div>
+
+    </div>
+
+</div>
 
                         </div>
+
 
                     </div>
 
@@ -1992,7 +1974,6 @@
 
                             </div>
 
-
                             <div
                                 id="prdProductOverview"
                                 class="content-text"
@@ -2004,7 +1985,43 @@
 
                         </article>
 
+                        <!--Problem Statement-->
+                         <article
+                            class="content-card lg:col-span-2"
+                        >
 
+                            <div class="card-header">
+
+                                <span
+                                    class="
+                                        material-symbols-outlined
+                                        text-primary
+                                    "
+                                >
+                                    problem
+                                </span>
+
+
+                                <h3
+                                    class="
+                                        font-semibold
+                                    "
+                                >
+                                   Problem Statement
+                                </h3>
+
+                            </div>
+
+                            <div
+                                id="prdProblemStatement"
+                                class="content-text"
+                            >
+                                <div class="empty-content">
+                                    Content not generated yet.
+                                </div>
+                            </div>
+
+                        </article>
                         <!-- Goals -->
 
                         <article
@@ -2335,6 +2352,7 @@
                     </div>
 
                 </section>
+
 
 
                 <!-- =====================================

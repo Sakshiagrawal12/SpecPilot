@@ -1,16 +1,27 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
+from sqlalchemy.orm.attributes import flag_modified
 import json
+from copy import deepcopy
 
 from app.database import get_db
-from app.models import Project, Task
+from app.models import (
+    Project,
+    Task,
+    Conversation,
+    Message,
+    ProjectRequirement
+)
 
 from app.ai.description import description_generator
 from app.ai.prd import prd_generator
 from app.ai.task_generator import task_generator
 from app.ai.sprint_generator import sprint_generator
 
+from app.agent.runner import (
+    create_empty_requirements,
+    process_message
+)
 
 # =========================================================
 # ROUTER
@@ -46,7 +57,704 @@ def get_project_or_404(
 
     return project
 
+def sync_requirements_to_project(
+    project,
+    requirements
+):
+    """
+    Copy collected agent requirements into the Project model.
 
+    ProjectRequirement is the working state during the conversation.
+    Project becomes the finalized source used by downstream generators.
+    """
+
+    field_mapping = {
+    "project_name": "project_name",
+    "category": "category",
+    "business_objective": "business_objective",
+    "target_users": "target_users",
+    "problem_statement": "problem_statement",
+    "expected_features": "expected_features",
+    "technology_preferences": "technology_preferences",
+    "timeline": "timeline",
+    "additional_instructions": "additional_instructions"
+}
+
+    for requirement_field, project_field in field_mapping.items():
+
+        field_data = requirements.get(
+            requirement_field,
+            {}
+        )
+
+        value = field_data.get("value")
+
+        print(
+        "SYNC:",
+        requirement_field,
+        "=>",
+        value
+        )
+
+        if value is not None:
+
+            if isinstance(value, list):
+                value = ", ".join(
+                    str(item)
+                    for item in value
+                )
+
+            setattr(
+                project,
+                project_field,
+                value
+            )
+
+# =========================================================
+# AGENT CHAT
+# =========================================================
+
+@router.post("/agent/chat/{project_id}")
+def agent_chat(
+    project_id: int,
+    message: str,
+    db: Session = Depends(get_db)
+):
+
+    # =====================================================
+    # 1. GET PROJECT
+    # =====================================================
+
+    project = get_project_or_404(
+        project_id,
+        db
+    )
+
+
+    # =====================================================
+    # 2. FIND ACTIVE CONVERSATION
+    # =====================================================
+
+    conversation = (
+        db.query(Conversation)
+        .filter(
+            Conversation.project_id == project_id,
+            Conversation.status == "active"
+        )
+        .order_by(
+            Conversation.created_at.desc()
+        )
+        .first()
+    )
+
+
+    # =====================================================
+    # 3. CREATE CONVERSATION IF NEEDED
+    # =====================================================
+
+    if not conversation:
+
+        conversation = Conversation(
+            project_id=project_id,
+            status="active"
+        )
+
+        db.add(conversation)
+        db.commit()
+        db.refresh(conversation)
+
+
+    # =====================================================
+    # 4. SAVE USER MESSAGE
+    # =====================================================
+
+    user_message = Message(
+        conversation_id=conversation.id,
+        role="user",
+        content=message
+    )
+
+    db.add(user_message)
+    db.commit()
+
+
+    # =====================================================
+    # 5. GET PROJECT REQUIREMENTS
+    # =====================================================
+
+    requirement_record = (
+        db.query(ProjectRequirement)
+        .filter(
+            ProjectRequirement.project_id == project_id
+        )
+        .first()
+    )
+
+
+    # =====================================================
+    # 6. CREATE REQUIREMENT RECORD IF NEEDED
+    # =====================================================
+
+    if not requirement_record:
+
+        requirement_record = ProjectRequirement(
+            project_id=project_id,
+            requirements=create_empty_requirements(),
+            completeness_status="INCOMPLETE",
+            completeness_score=0
+        )
+
+        db.add(requirement_record)
+        db.commit()
+        db.refresh(requirement_record)
+
+
+    # =====================================================
+    # 7. LOAD EXISTING REQUIREMENTS
+    # =====================================================
+
+    requirements = deepcopy(
+        requirement_record.requirements
+    )
+
+    if not requirements:
+
+        requirements = create_empty_requirements()
+
+
+    # =====================================================
+    # PROJECT NAME IS ALREADY KNOWN
+    # =====================================================
+
+    requirements["project_name"] = {
+        "value": project.project_name,
+        "confidence": 1.0,
+        "status": "complete"
+    }
+
+
+    print("\n" + "=" * 70)
+    print("REQUIREMENTS LOADED FROM DATABASE")
+    print("=" * 70)
+
+    print(requirements)
+
+    print("=" * 70)
+    print("PROJECT NAME SEEDED FROM PROJECT")
+    print("=" * 70)
+
+    print("Project ID:", project.id)
+    print("Project Name:", project.project_name)
+
+    print("=" * 70)
+
+
+    # =====================================================
+    # 8. RUN LANGGRAPH AGENT
+    # =====================================================
+
+    try:
+
+        result = process_message(
+            user_message=message,
+            requirements=requirements
+        )
+
+
+    except Exception as e:
+
+        print(
+            "AGENT PROCESSING ERROR:",
+            str(e)
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Agent processing failed: {str(e)}"
+        )
+
+
+    # =====================================================
+    # 9. GET FINAL REQUIREMENTS FROM AGENT
+    # =====================================================
+
+    result_requirements = deepcopy(
+        result.get(
+            "requirements",
+            requirements
+        )
+    )
+
+
+    # =====================================================
+    # PROJECT NAME MUST ALWAYS COME FROM DATABASE
+    # =====================================================
+
+    result_requirements["project_name"] = {
+        "value": project.project_name,
+        "confidence": 1.0,
+        "status": "complete"
+    }
+
+
+    print("\n" + "=" * 70)
+    print("REQUIREMENTS RETURNED BY AGENT")
+    print("=" * 70)
+
+    print(result_requirements)
+
+    print("=" * 70)
+
+
+    # =====================================================
+    # 10. SAVE REQUIREMENTS
+    # =====================================================
+
+    requirement_record.requirements = deepcopy(
+        result_requirements
+    )
+
+    requirement_record.completeness_status = result.get(
+        "completeness_status",
+        "INCOMPLETE"
+    )
+
+    requirement_record.completeness_score = int(
+        result.get(
+            "completeness_score",
+            0
+        )
+    )
+
+    flag_modified(
+        requirement_record,
+        "requirements"
+    )
+
+    db.commit()
+
+    db.refresh(
+        requirement_record
+    )
+
+
+    print("\n" + "=" * 70)
+    print("REQUIREMENTS SAVED IN DATABASE")
+    print("=" * 70)
+
+    print(
+        requirement_record.requirements
+    )
+
+    print("=" * 70)
+
+
+    # =====================================================
+    # 11. SAVE AGENT MESSAGE
+    # =====================================================
+
+    agent_message = Message(
+        conversation_id=conversation.id,
+        role="agent",
+        content=result.get(
+            "agent_response",
+            ""
+        )
+    )
+
+    db.add(
+        agent_message
+    )
+
+    db.commit()
+
+
+    # =====================================================
+    # 12. DEBUG FINAL AGENT RESULT
+    # =====================================================
+
+    print("\n" + "=" * 70)
+    print("FINAL AGENT RESULT")
+    print("=" * 70)
+
+    print(
+        "NEXT ACTION:",
+        result.get("next_action")
+    )
+
+    print(
+        "COMPLETENESS STATUS:",
+        result.get("completeness_status")
+    )
+
+    print(
+        "MISSING FIELDS:",
+        result.get("missing_fields")
+    )
+
+    print(
+        "COMPLETENESS SCORE:",
+        result.get("completeness_score")
+    )
+
+    print("=" * 70)
+
+
+    # =====================================================
+    # 13. ONLY FINALIZE WHEN ALL REQUIREMENTS ARE COMPLETE
+    # =====================================================
+
+    if result.get("next_action") == "generate_prd":
+
+        print("\n" + "=" * 70)
+        print("ALL REQUIREMENTS COMPLETE")
+        print("FINALIZING PROJECT")
+        print("=" * 70)
+
+
+        # -------------------------------------------------
+        # SYNC REQUIREMENTS TO PROJECT
+        # -------------------------------------------------
+
+        sync_requirements_to_project(
+            project,
+            result_requirements
+        )
+
+
+        print("\nPROJECT AFTER REQUIREMENT SYNC")
+        print("=" * 70)
+
+        print(
+            "PROJECT NAME:",
+            project.project_name
+        )
+
+        print(
+            "CATEGORY:",
+            project.category
+        )
+
+        print(
+            "BUSINESS OBJECTIVE:",
+            project.business_objective
+        )
+
+        print(
+            "TARGET USERS:",
+            project.target_users
+        )
+
+        print(
+            "PROBLEM STATEMENT:",
+            project.problem_statement
+        )
+
+        print(
+            "EXPECTED FEATURES:",
+            project.expected_features
+        )
+
+        print(
+            "TECHNOLOGY PREFERENCES:",
+            project.technology_preferences
+        )
+
+        print(
+            "TIMELINE:",
+            project.timeline
+        )
+
+        print(
+            "ADDITIONAL INSTRUCTIONS:",
+            project.additional_instructions
+        )
+
+        print("=" * 70)
+
+
+        # -------------------------------------------------
+        # GENERATE REFINED DESCRIPTION
+        # -------------------------------------------------
+
+        try:
+
+            print("\n" + "=" * 70)
+            print("GENERATING REFINED PROJECT DESCRIPTION")
+            print("=" * 70)
+
+
+            description = (
+                description_generator.generate(
+                    project
+                )
+            )
+
+
+            print("\nGENERATED DESCRIPTION:")
+            print(description)
+
+
+            # -------------------------------------------------
+            # SAVE DESCRIPTION
+            # -------------------------------------------------
+
+            project.overview = description.get(
+                "overview",
+                ""
+            )
+
+            project.ai_problem_statement = (
+                description.get(
+                    "problem_statement",
+                    ""
+                )
+            )
+
+            project.proposed_solution = (
+                description.get(
+                    "proposed_solution",
+                    ""
+                )
+            )
+
+            project.target_audience = (
+                description.get(
+                    "target_audience",
+                    ""
+                )
+            )
+
+            project.business_value = (
+                description.get(
+                    "business_value",
+                    ""
+                )
+            )
+
+            project.major_features = (
+                description.get(
+                    "major_features",
+                    ""
+                )
+            )
+
+            project.expected_outcome = (
+                description.get(
+                    "expected_outcome",
+                    ""
+                )
+            )
+
+
+            print("\n" + "=" * 70)
+            print("REFINED DESCRIPTION SAVED")
+            print("=" * 70)
+
+            print(
+                "OVERVIEW:",
+                project.overview
+            )
+
+            print(
+                "AI PROBLEM STATEMENT:",
+                project.ai_problem_statement
+            )
+
+            print(
+                "PROPOSED SOLUTION:",
+                project.proposed_solution
+            )
+
+            print(
+                "TARGET AUDIENCE:",
+                project.target_audience
+            )
+
+            print(
+                "BUSINESS VALUE:",
+                project.business_value
+            )
+
+            print(
+                "MAJOR FEATURES:",
+                project.major_features
+            )
+
+            print(
+                "EXPECTED OUTCOME:",
+                project.expected_outcome
+            )
+
+            print("=" * 70)
+
+
+        except Exception as e:
+
+            print(
+                "DESCRIPTION GENERATION ERROR:",
+                str(e)
+            )
+
+            db.rollback()
+
+            raise HTTPException(
+                status_code=500,
+                detail=(
+                    "Requirements were collected successfully, "
+                    "but description generation failed: "
+                    f"{str(e)}"
+                )
+            )
+
+
+        # -------------------------------------------------
+        # COMPLETE CONVERSATION
+        # -------------------------------------------------
+
+        conversation.status = "completed"
+
+
+        # -------------------------------------------------
+        # FINAL DATABASE COMMIT
+        # -------------------------------------------------
+
+        db.commit()
+
+        db.refresh(
+            project
+        )
+
+
+        print("\n" + "=" * 70)
+        print("FINAL PROJECT SAVED TO DATABASE")
+        print("=" * 70)
+
+        print(
+            "Project ID:",
+            project.id
+        )
+
+        print(
+            "Category:",
+            project.category
+        )
+
+        print(
+            "Business Objective:",
+            project.business_objective
+        )
+
+        print(
+            "Target Users:",
+            project.target_users
+        )
+
+        print(
+            "Problem Statement:",
+            project.problem_statement
+        )
+
+        print(
+            "Expected Features:",
+            project.expected_features
+        )
+
+        print(
+            "Technology Preferences:",
+            project.technology_preferences
+        )
+
+        print(
+            "Timeline:",
+            project.timeline
+        )
+
+        print(
+            "Additional Instructions:",
+            project.additional_instructions
+        )
+
+        print(
+            "Overview:",
+            project.overview
+        )
+
+        print(
+            "AI Problem Statement:",
+            project.ai_problem_statement
+        )
+
+        print(
+            "Proposed Solution:",
+            project.proposed_solution
+        )
+
+        print(
+            "Target Audience:",
+            project.target_audience
+        )
+
+        print(
+            "Business Value:",
+            project.business_value
+        )
+
+        print(
+            "Major Features:",
+            project.major_features
+        )
+
+        print(
+            "Expected Outcome:",
+            project.expected_outcome
+        )
+
+        print("=" * 70)
+
+
+    # =====================================================
+    # 14. RETURN RESPONSE
+    # =====================================================
+
+    return {
+
+        "conversation_id":
+            conversation.id,
+
+        "message":
+            result.get(
+                "agent_response",
+                ""
+            ),
+
+        "requirements":
+            result_requirements,
+
+        "missing_fields":
+            result.get(
+                "missing_fields",
+                []
+            ),
+
+        "completeness_status":
+            result.get(
+                "completeness_status",
+                "INCOMPLETE"
+            ),
+
+        "completeness_score":
+            result.get(
+                "completeness_score",
+                0
+            ),
+
+        "next_action":
+            result.get(
+                "next_action",
+                "wait_for_user"
+            )
+    }
 # =========================================================
 # GENERATE DESCRIPTION
 # =========================================================
@@ -248,7 +956,40 @@ def generate_prd(
         project_id,
         db
     )
+    # -----------------------------------------------------
+    # Verify requirement collection is complete
+    # -----------------------------------------------------
 
+    requirement_record = (
+        db.query(ProjectRequirement)
+        .filter(
+            ProjectRequirement.project_id == project_id
+        )
+        .first()
+    )
+
+    if not requirement_record:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Project requirements have not been collected."
+        )
+
+    if requirement_record.completeness_status != "COMPLETE":
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Project requirements are incomplete. "
+                "Complete the agent requirement collection "
+                "before generating the PRD."
+            )
+        )
+
+    requirements = (
+        requirement_record.requirements
+        or {}
+    )
     try:
 
         print(
@@ -262,6 +1003,19 @@ def generate_prd(
             project_id
         )
         print(
+            "PROJECT:",
+            project.project_name
+        )
+
+        print(
+            "COLLECTED REQUIREMENTS:"
+        )
+
+        print(
+            requirements
+        )
+
+        print(
             "================================="
         )
 
@@ -270,10 +1024,11 @@ def generate_prd(
         # -------------------------------------------------
 
         response = (
-            prd_generator.generate_prd(
-                project
-            )
+        prd_generator.generate_prd(
+            project,
+            requirements
         )
+    )
 
         # -------------------------------------------------
         # Save PRD
@@ -354,7 +1109,7 @@ def generate_prd(
         db.refresh(project)
 
         print(
-            "AI PRD SAVED"
+            "AI PRD SAVED SUCCESSFULLY"
         )
 
         # -------------------------------------------------
@@ -362,6 +1117,7 @@ def generate_prd(
         # -------------------------------------------------
 
         return {
+            "status":"success",
             "message": "PRD generated successfully.",
 
             "project_id": project.id,

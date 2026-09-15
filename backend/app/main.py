@@ -11,8 +11,8 @@ from app.routers import project
 from app.routers import ai
 from app.routers import tasks
 from app.routers import auth
-
-
+from app.routers.agent import router as agent_router
+from app.routers.project import router as projects_router
 # =========================================================
 # DATABASE & DIRECTORIES
 # =========================================================
@@ -74,7 +74,9 @@ app.include_router(
     auth.router
 )
 
+app.include_router(agent_router)
 
+app.include_router(projects_router)
 # =========================================================
 # HOME
 # =========================================================

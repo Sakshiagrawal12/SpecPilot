@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional,List,Dict,Any
 
 from pydantic import BaseModel, ConfigDict
 
@@ -31,21 +31,7 @@ class ProjectCreate(BaseModel):
 
     project_name: str
 
-    category: Optional[str] = None
-
-    business_objective: Optional[str] = None
-
-    target_users: Optional[str] = None
-
-    problem_statement: Optional[str] = None
-
-    expected_features: Optional[str] = None
-
-    technology_preferences: Optional[str] = None
-
-    timeline: Optional[str] = None
-
-    additional_instructions: Optional[str] = None
+    
 
 
 # =========================================================
@@ -305,3 +291,119 @@ class FeedbackResponse(BaseModel):
     rating: Optional[int] = None
 
     feedback: Optional[str] = None
+
+# =========================================================
+# CONVERSATION / AGENT
+# =========================================================
+
+
+class ConversationCreate(BaseModel):
+    """
+    Used when starting a new project conversation.
+    """
+
+    project_id: int
+
+
+class MessageCreate(BaseModel):
+    """
+    User message sent to the conversational agent.
+    """
+
+    content: str
+
+
+class MessageResponse(BaseModel):
+    """
+    Message returned from the conversation history.
+    """
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+    id: int
+
+    conversation_id: int
+
+    role: str
+
+    content: str
+
+
+# =========================================================
+# REQUIREMENT FIELD
+# =========================================================
+
+
+class RequirementField(BaseModel):
+    """
+    Represents the agent's understanding of one
+    project requirement.
+    """
+
+    value: Optional[Any] = None
+
+    confidence: float = 0.0
+
+    status: str = "missing"
+
+
+# =========================================================
+# PROJECT REQUIREMENT STATE
+# =========================================================
+
+
+class ProjectRequirementResponse(BaseModel):
+    """
+    Structured requirement state maintained by the agent.
+    """
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+    id: int
+
+    project_id: int
+
+    requirements: Dict[str, Any]
+
+    completeness_status: str
+
+    completeness_score: int
+
+
+# =========================================================
+# AGENT RESPONSE
+# =========================================================
+
+
+class AgentResponse(BaseModel):
+    """
+    Response returned after the user sends a message.
+    """
+
+    conversation_id: int
+
+    message: str
+
+    requirements: Dict[str, Any]
+
+    completeness_status: str
+
+    completeness_score: int
+
+    missing_fields: List[str] = []
+
+    unclear_fields: List[str] = []
+
+    contradictory_fields: List[str] = []
+
+    next_action: str
+    
+class AgentChatRequest(BaseModel):
+    project_id: int
+    message: str = ""
+    thread_id: str
+    initialize: bool = False

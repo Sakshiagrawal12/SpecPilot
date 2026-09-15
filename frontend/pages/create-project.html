@@ -273,20 +273,36 @@
             <!-- Projects -->
 
             <a
-                href="create-project.html"
-                class="flex items-center gap-3 bg-secondary-container text-on-secondary-container rounded-lg px-4 py-3 border-l-4 border-primary transition-colors duration-200 shadow-sm relative overflow-hidden"
+                href="project-details.html"
+                class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
+            
             >
 
-                <span class="material-symbols-outlined text-primary">
-                    folder_open
+                <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">
+               folder_open
                 </span>
 
-                <span class="font-label-md text-label-md font-bold text-primary">
+                <span class="font-label-md text-label-md ">
                     Projects
                 </span>
 
             </a>
 
+               <a
+            class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
+            
+            href="agent.html"
+        >
+
+            <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">
+                smart_toy
+            </span>
+
+            <span class="font-label-md text-label-md">
+                SpecPilot Agent
+            </span>
+
+        </a>
 
             <!-- Feedback -->
 
@@ -651,382 +667,6 @@
                         </div>
 
 
-                        <!-- CATEGORY -->
-
-                        <div>
-
-                            <label
-                                for="category"
-                                class="block font-label-md text-label-md text-on-surface mb-2"
-                            >
-                                Category
-                                <span class="text-error">*</span>
-                            </label>
-
-                            <select
-                                id="category"
-                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-                            >
-
-                                <option value="">
-                                    Select category
-                                </option>
-
-                                <option value="AI / Machine Learning">
-                                    AI / Machine Learning
-                                </option>
-
-                                <option value="Web Application">
-                                    Web Application
-                                </option>
-
-                                <option value="Mobile Application">
-                                    Mobile Application
-                                </option>
-
-                                <option value="Data Science">
-                                    Data Science
-                                </option>
-
-                                <option value="Automation">
-                                    Automation
-                                </option>
-
-                                <option value="Other">
-                                    Other
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <!-- TIMELINE -->
-
-                        <div>
-
-                            <label
-                                for="timeline"
-                                class="block font-label-md text-label-md text-on-surface mb-2"
-                            >
-                                Timeline
-                                <span class="text-error">*</span>
-                            </label>
-
-                            <select
-                                id="timeline"
-                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-                            >
-
-                                <option value="">
-                                    Select timeline
-                                </option>
-
-                                <option value="1-2 weeks">
-                                    1-2 weeks
-                                </option>
-
-                                <option value="2-4 weeks">
-                                    2-4 weeks
-                                </option>
-
-                                <option value="1-2 months">
-                                    1-2 months
-                                </option>
-
-                                <option value="3-6 months">
-                                    3-6 months
-                                </option>
-
-                                <option value="6+ months">
-                                    6+ months
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- ================================================= -->
-                <!-- PROJECT REQUIREMENTS -->
-                <!-- ================================================= -->
-
-                <section
-                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 md:p-8 shadow-sm"
-                >
-
-                    <div class="flex items-start gap-3 mb-6">
-
-                        <div
-                            class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
-                        >
-
-                            <span class="material-symbols-outlined">
-                                target
-                            </span>
-
-                        </div>
-
-                        <div>
-
-                            <h3
-                                class="font-headline-md text-headline-md text-on-surface"
-                            >
-                                Project Requirements
-                            </h3>
-
-                            <p
-                                class="font-body-sm text-body-sm text-on-surface-variant mt-1"
-                            >
-                                Explain what you want your project to accomplish.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="space-y-5">
-
-
-                        <!-- OBJECTIVE -->
-
-                        <div>
-
-                            <label
-                                for="objective"
-                                class="block font-label-md text-label-md text-on-surface mb-2"
-                            >
-                                Business Objective
-                                <span class="text-error">*</span>
-                            </label>
-
-                            <textarea
-                                id="objective"
-                                rows="4"
-                                placeholder="What should this project achieve?"
-                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-y"
-                            ></textarea>
-
-                        </div>
-
-
-                        <!-- TARGET USERS -->
-
-                        <div>
-
-                            <label
-                                for="targetUsers"
-                                class="block font-label-md text-label-md text-on-surface mb-2"
-                            >
-                                Target Users
-                                <span class="text-error">*</span>
-                            </label>
-
-                            <textarea
-                                id="targetUsers"
-                                rows="3"
-                                placeholder="Who will use this project?"
-                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-y"
-                            ></textarea>
-
-                        </div>
-
-
-                        <!-- PROBLEM -->
-
-                        <div>
-
-                            <label
-                                for="problemStatement"
-                                class="block font-label-md text-label-md text-on-surface mb-2"
-                            >
-                                Problem Statement
-                                <span class="text-error">*</span>
-                            </label>
-
-                            <textarea
-                                id="problemStatement"
-                                rows="4"
-                                placeholder="What problem are you trying to solve?"
-                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-y"
-                            ></textarea>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <!-- ================================================= -->
-                <!-- EXPECTED FEATURES -->
-                <!-- ================================================= -->
-
-                <section
-                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 md:p-8 shadow-sm"
-                >
-
-                    <div class="flex items-start gap-3 mb-6">
-
-                        <div
-                            class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
-                        >
-
-                            <span class="material-symbols-outlined">
-                                checklist
-                            </span>
-
-                        </div>
-
-                        <div>
-
-                            <h3
-                                class="font-headline-md text-headline-md text-on-surface"
-                            >
-                                Expected Features
-                            </h3>
-
-                            <p
-                                class="font-body-sm text-body-sm text-on-surface-variant mt-1"
-                            >
-                                Add the main features you expect in the project.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="flex flex-col sm:flex-row gap-3">
-
-                        <input
-                            id="featureInput"
-                            type="text"
-                            placeholder="e.g. User authentication"
-                            class="flex-1 bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
-                        />
-
-                        <button
-                            id="addFeatureBtn"
-                            type="button"
-                            class="bg-primary hover:bg-[#3730a3] text-on-primary font-label-md text-label-md px-5 py-3 rounded-lg flex items-center justify-center gap-2 transition-all"
-                        >
-
-                            <span class="material-symbols-outlined text-[18px]">
-                                add
-                            </span>
-
-                            Add Feature
-
-                        </button>
-
-                    </div>
-
-
-                    <ul
-                        id="featureList"
-                        class="mt-4 space-y-2"
-                    ></ul>
-
-                </section>
-
-
-                <!-- ================================================= -->
-                <!-- TECHNOLOGY -->
-                <!-- ================================================= -->
-
-                <section
-                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 md:p-8 shadow-sm"
-                >
-
-                    <div class="flex items-start gap-3 mb-6">
-
-                        <div
-                            class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
-                        >
-
-                            <span class="material-symbols-outlined">
-                                code
-                            </span>
-
-                        </div>
-
-                        <div>
-
-                            <h3
-                                class="font-headline-md text-headline-md text-on-surface"
-                            >
-                                Technology & Instructions
-                            </h3>
-
-                            <p
-                                class="font-body-sm text-body-sm text-on-surface-variant mt-1"
-                            >
-                                Tell SpecPilot about your preferred technologies
-                                and any additional requirements.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="space-y-5">
-
-
-                        <!-- TECHNOLOGY -->
-
-                        <div>
-
-                            <label
-                                for="techPrefs"
-                                class="block font-label-md text-label-md text-on-surface mb-2"
-                            >
-                                Technology Preferences
-                                <span class="text-error">*</span>
-                            </label>
-
-                            <textarea
-                                id="techPrefs"
-                                rows="3"
-                                placeholder="e.g. Python, FastAPI, React, PostgreSQL"
-                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-y"
-                            ></textarea>
-
-                        </div>
-
-
-                        <!-- ADDITIONAL INSTRUCTIONS -->
-
-                        <div>
-
-                            <label
-                                for="instructions"
-                                class="block font-label-md text-label-md text-on-surface mb-2"
-                            >
-                                Additional Instructions
-                                <span class="text-outline text-xs font-normal">
-                                    (Optional)
-                                </span>
-                            </label>
-
-                            <textarea
-                                id="instructions"
-                                rows="4"
-                                placeholder="Anything else SpecPilot should know?"
-                                class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all resize-y"
-                            ></textarea>
-
-                        </div>
-
-                    </div>
-
-                </section>
 
 
                 <!-- ================================================= -->
@@ -1045,25 +685,23 @@
                         Cancel
                     </button>
 
+                     <button
+            type="submit"
+            id="createProjectButton"
+        >
 
-                    <button
-                        id="createProjectButton"
-                        type="submit"
-                        class="px-6 py-3 rounded-lg bg-primary hover:bg-[#3730a3] text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all"
-                    >
+            <span
+                id="createProjectButtonIcon"
+                class="material-symbols-outlined"
+            >
+                smart_toy
+            </span>
 
-                        <span
-                            id="createProjectIcon"
-                            class="material-symbols-outlined text-[18px]"
-                        >
-                            add
-                        </span>
+            <span id="createProjectButtonText">
+                Start with Agent
+            </span>
 
-                        <span id="createProjectText">
-                            Create Project
-                        </span>
-
-                    </button>
+        </button>
 
                 </div>
 

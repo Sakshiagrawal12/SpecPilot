@@ -1,67 +1,53 @@
+from app.database import SessionLocal
+from app.models import Project
 
-from sqlalchemy import inspect, text
+USER_ID = 2  # change this to your user ID
 
-from app.database import engine
+db = SessionLocal()
 
+try:
 
-# =========================================================
-# DATABASE MIGRATION
-# =========================================================
+    projects = (
+        db.query(Project)
+        .filter(Project.user_id == USER_ID)
+        .all()
+    )
 
-def add_missing_columns():
+    print(f"Found {len(projects)} projects.")
 
-    inspector = inspect(engine)
+    for project in projects:
+        print(
+            f"Deleting project: "
+            f"id={project.id}, "
+            f"name={project.project_name}"
+        )
 
-    print("====================================")
-    print("SPEC PILOT DATABASE MIGRATION")
-    print("====================================")
+        db.delete(project)
 
-    # -----------------------------------------------------
-    # PROJECTS TABLE
-    # -----------------------------------------------------
+    db.commit()
 
-    project_columns = {
-        column["name"]
-        for column in inspector.get_columns("projects")
-    }
+    print(
+        f"Successfully deleted {len(projects)} projects."
+    )
 
-    required_project_columns = {
-        "ai_problem_statement": "TEXT",
-        "target_audience": "TEXT",
-    }
+except Exception as e:
 
-    with engine.begin() as connection:
+    db.rollback()
 
-        for column_name, column_type in required_project_columns.items():
+    print("ERROR:", e)
 
-            if column_name not in project_columns:
+finally:
 
-                print(
-                    f"Adding missing column: "
-                    f"projects.{column_name}"
-                )
+    db.close()
 
-                connection.execute(
-                    text(
-                        f"""
-                        ALTER TABLE projects
-                        ADD COLUMN {column_name} {column_type}
-                        """
-                    )
-                )
-
-            else:
-
-                print(
-                    f"Column already exists: "
-                    f"projects.{column_name}"
-                )
-
-    print()
-    print("====================================")
-    print("DATABASE MIGRATION COMPLETED")
-    print("====================================")
+Category: Finance & Personal Management
+Business Objective: Help users track income, expenses, savings, and monthly budgets.
+Target Users: Students, working professionals, and individuals managing personal finances.
+Problem Statement: People often lose track of their spending because their expenses are recorded across different applications or not recorded at all.
+Expected Features: Expense tracking, income management, monthly budgets, spending categories, reports, charts, and financial alerts.
+Technology Preferences: React, FastAPI, Python, PostgreSQL.
+Timeline: 2 months.
+Additional Instructions: The dashboard should clearly display spending patterns and remaining budget
 
 
-if __name__ == "__main__":
-    add_missing_columns()
+

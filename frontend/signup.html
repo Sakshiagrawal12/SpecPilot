@@ -483,7 +483,7 @@ document
 // SIGN UP
 // --------------------------------------------------
 
-signupForm.addEventListener("submit", function (event) {
+signupForm.addEventListener("submit", async function (event) {
 
     event.preventDefault();
 
@@ -560,6 +560,12 @@ signupForm.addEventListener("submit", function (event) {
         });
 
         const data = await response.json();
+
+        console.log(
+            "Signup response:",
+            response.status,
+            data
+        );
 
         if (!response.ok) {
             showError(data.detail || "Failed to create account. Please try again.");

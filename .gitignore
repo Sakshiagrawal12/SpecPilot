@@ -1,1 +1,8 @@
-\.venv
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+*.db
+
+#git archive --format=zip --output=SpecPilot.zip HEAD this command is for making the zip file of the project.

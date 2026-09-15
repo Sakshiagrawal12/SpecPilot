@@ -7,11 +7,35 @@ from langchain_groq import ChatGroq
 load_dotenv()
 
 
-class GroqClient:
+# =========================================================
+# LLM CONFIGURATION
+# =========================================================
+
+LLM_PROVIDER = os.getenv(
+    "LLM_PROVIDER",
+    "groq"
+)
+
+LLM_MODEL = os.getenv(
+    "LLM_MODEL",
+    "openai/gpt-oss-20b"
+)
+
+LLM_TEMPERATURE = float(
+    os.getenv(
+        "LLM_TEMPERATURE",
+        "0.2"
+    )
+)
+
+
+# =========================================================
+# GROQ PROVIDER
+# =========================================================
+
+class GroqProvider:
 
     def __init__(self):
-
-        self.model = "openai/gpt-oss-20b"
 
         api_key = os.getenv(
             "GROQ_API_KEY"
@@ -25,15 +49,14 @@ class GroqClient:
 
         self.client = ChatGroq(
 
-            model=self.model,
+            model=LLM_MODEL,
 
-            temperature=0.2,
+            temperature=LLM_TEMPERATURE,
 
             reasoning_effort="low",
 
             api_key=api_key
         )
-
 
     def generate(
         self,
@@ -41,12 +64,17 @@ class GroqClient:
     ) -> str:
 
         print("==========================================")
-        print("SENDING PROMPT TO GROQ")
+        print("LLM GENERATION")
         print("==========================================")
 
         print(
+            "Provider:",
+            "Groq"
+        )
+
+        print(
             "Model:",
-            self.model
+            LLM_MODEL
         )
 
         print(
@@ -65,11 +93,11 @@ class GroqClient:
             if not content:
 
                 raise RuntimeError(
-                    "Groq returned an empty response."
+                    "LLM returned an empty response."
                 )
 
             print("==========================================")
-            print("GROQ RESPONSE RECEIVED")
+            print("LLM RESPONSE RECEIVED")
             print("==========================================")
 
             print(
@@ -82,7 +110,7 @@ class GroqClient:
         except Exception as e:
 
             print("==========================================")
-            print("GROQ ERROR")
+            print("LLM ERROR")
             print("==========================================")
 
             print(
@@ -90,8 +118,27 @@ class GroqClient:
             )
 
             raise RuntimeError(
-                f"Groq generation failed: {str(e)}"
+                f"LLM generation failed: {str(e)}"
             )
 
 
-llm = GroqClient()
+# =========================================================
+# LLM FACTORY
+# =========================================================
+
+def create_llm():
+
+    if LLM_PROVIDER.lower() == "groq":
+
+        return GroqProvider()
+
+    raise RuntimeError(
+        f"Unsupported LLM provider: {LLM_PROVIDER}"
+    )
+
+
+# =========================================================
+# APPLICATION LLM
+# =========================================================
+
+llm = create_llm()
