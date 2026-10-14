@@ -84,11 +84,12 @@ class GroqProvider:
 
         try:
 
-            response = self.client.invoke(
-                prompt
-            )
+            
+            response = self.client.invoke(prompt)
 
             content = response.content
+
+            print("LLM RESPONSE CONTENT:", repr(content))
 
             if not content:
 

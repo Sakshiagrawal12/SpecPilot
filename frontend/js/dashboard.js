@@ -347,7 +347,405 @@ async function loadProjects() {
 
 }
 
+// =========================================================
+// DELETE PROJECT
+// =========================================================
 
+async function deleteProject(projectId, projectName) {
+
+    console.log("=================================");
+    console.log("DELETE PROJECT");
+    console.log("PROJECT ID:", projectId);
+    console.log("PROJECT NAME:", projectName);
+    console.log("=================================");
+
+    // -----------------------------------------------------
+    // CONFIRMATION
+    // -----------------------------------------------------
+
+    const confirmed = window.confirm(
+        `Are you sure you want to delete "${projectName}"?\n\n` +
+        `This will permanently delete the project, ` +
+        `requirements, tasks, conversations and messages.\n\n` +
+        `This action cannot be undone.`
+    );
+
+    if (!confirmed) {
+
+        console.log(
+            "Project deletion cancelled."
+        );
+
+        return;
+    }
+
+
+    // -----------------------------------------------------
+    // AUTHENTICATION
+    // -----------------------------------------------------
+
+    const accessToken =
+        localStorage.getItem("access_token");
+
+
+    if (!accessToken) {
+
+        console.error(
+            "Access token not found."
+        );
+
+        window.location.href =
+            "../index.html";
+
+        return;
+    }
+
+
+    try {
+
+        // -------------------------------------------------
+        // DELETE REQUEST
+        // -------------------------------------------------
+
+        const response = await fetch(
+            `${API_URL}/projects/${projectId}`,
+            {
+                method: "DELETE",
+
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`,
+                    "Accept": "application/json"
+                }
+            }
+        );
+
+
+        console.log(
+            "Delete API status:",
+            response.status
+        );
+
+
+        // -------------------------------------------------
+        // AUTH ERROR
+        // -------------------------------------------------
+
+        if (response.status === 401) {
+
+            console.error(
+                "Authentication failed."
+            );
+
+            localStorage.removeItem(
+                "access_token"
+            );
+
+            localStorage.removeItem(
+                "user"
+            );
+
+            localStorage.removeItem(
+                "user_id"
+            );
+
+            window.location.href =
+                "../index.html";
+
+            return;
+        }
+
+
+        // -------------------------------------------------
+        // OTHER ERROR
+        // -------------------------------------------------
+
+        if (!response.ok) {
+
+            const errorData =
+                await response.json()
+                    .catch(() => ({}));
+
+
+            console.error(
+                "Delete project failed:",
+                errorData
+            );
+
+            showNotification(
+                errorData.detail ||
+                "Unable to delete the project.",
+                "error"
+            );
+            
+
+            return;
+        }
+
+
+        // -------------------------------------------------
+        // SUCCESS
+        // -------------------------------------------------
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Project deleted successfully:",
+            data
+        );
+
+
+        // -------------------------------------------------
+        // CLEAR SELECTED PROJECT
+        // -------------------------------------------------
+
+        const selectedProjectId =
+            localStorage.getItem(
+                "selected_project_id"
+            );
+
+
+        if (
+            selectedProjectId ===
+            String(projectId)
+        ) {
+
+            localStorage.removeItem(
+                "selected_project_id"
+            );
+
+            localStorage.removeItem(
+                "selected_project_name"
+            );
+
+            localStorage.removeItem(
+                "agent_thread_id"
+            );
+
+            console.log(
+                "Selected project information cleared."
+            );
+        }
+
+
+        // -------------------------------------------------
+        // REMOVE FROM LOCAL PROJECT LIST
+        // -------------------------------------------------
+
+        allProjects =
+            allProjects.filter(
+                function (project) {
+
+                    const id =
+                        project.id ??
+                        project.project_id;
+
+                    return String(id) !==
+                        String(projectId);
+                }
+            );
+
+
+        // -------------------------------------------------
+        // REFRESH DISPLAY
+        // -------------------------------------------------
+
+        renderCurrentProjects();
+
+            showNotification(
+                `"${projectName}" was deleted successfully.`
+            );
+        console.log(
+            "Dashboard updated after deletion."
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "DELETE PROJECT ERROR:",
+            error
+        );
+
+        showNotification(
+            "Unable to connect to the backend server.",
+            "error"
+        );
+
+    }
+
+}
+
+// =========================================================
+// SHOW NOTIFICATION
+// =========================================================
+
+function showNotification(message, type = "success") {
+
+    // Remove existing notification
+    const existingNotification =
+        document.getElementById("dashboardNotification");
+
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+
+
+    const notification =
+        document.createElement("div");
+
+    notification.id =
+        "dashboardNotification";
+
+
+    const isSuccess =
+        type === "success";
+
+
+    notification.className = `
+        fixed
+        top-6
+        right-6
+        z-[9999]
+        flex
+        items-center
+        gap-3
+        px-5
+        py-4
+        rounded-xl
+        shadow-lg
+        border
+        backdrop-blur-sm
+        transition-all
+        duration-300
+        translate-x-0
+        opacity-100
+        ${isSuccess
+            ? "bg-green-50 border-green-200 text-green-800"
+            : "bg-red-50 border-red-200 text-red-800"
+        }
+    `;
+
+
+    notification.innerHTML = `
+
+        <div class="
+            w-9
+            h-9
+            rounded-full
+            flex
+            items-center
+            justify-center
+            ${isSuccess
+                ? "bg-green-100"
+                : "bg-red-100"
+            }
+        ">
+
+            <span class="
+                material-symbols-outlined
+                text-[20px]
+                ${isSuccess
+                    ? "text-green-600"
+                    : "text-red-600"
+                }
+            ">
+                ${isSuccess
+                    ? "check_circle"
+                    : "error"
+                }
+            </span>
+
+        </div>
+
+
+        <div class="flex flex-col">
+
+            <span class="
+                text-[14px]
+                font-semibold
+            ">
+                ${isSuccess
+                    ? "Success"
+                    : "Something went wrong"
+                }
+            </span>
+
+            <span class="
+                text-[13px]
+                opacity-80
+            ">
+                ${escapeHtml(message)}
+            </span>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="
+                ml-2
+                opacity-60
+                hover:opacity-100
+                transition-opacity
+            "
+            title="Close"
+        >
+            <span class="
+                material-symbols-outlined
+                text-[18px]
+            ">
+                close
+            </span>
+        </button>
+
+    `;
+
+
+    document.body.appendChild(
+        notification
+    );
+
+
+    // -----------------------------------------------------
+    // CLOSE BUTTON
+    // -----------------------------------------------------
+
+    const closeButton =
+        notification.querySelector("button");
+
+
+    if (closeButton) {
+
+        closeButton.addEventListener(
+            "click",
+            function () {
+
+                notification.remove();
+
+            }
+        );
+
+    }
+
+
+    // -----------------------------------------------------
+    // AUTO REMOVE
+    // -----------------------------------------------------
+
+    setTimeout(
+        function () {
+
+            if (notification) {
+                notification.remove();
+            }
+
+        },
+        4000
+    );
+
+}
 // =========================================================
 // SEARCH
 // =========================================================
@@ -454,6 +852,7 @@ function setupViewToggle() {
             updateViewButtons();
 
             renderCurrentProjects();
+                       
 
         }
     );
@@ -1065,23 +1464,55 @@ function createProjectCard(project) {
 
 
             <div class="
-                mt-auto
-                pt-4
-                border-t
-                border-outline-variant/40
-            ">
+    mt-auto
+    pt-4
+    border-t
+    border-outline-variant/40
+    flex
+    items-center
+    justify-between
+    gap-3
+">
 
-                <span class="
-                    font-body-sm
-                    text-[12px]
-                    text-on-surface-variant
-                ">
-                    Timeline:
-                    ${escapeHtml(timeline)}
-                </span>
+    <span class="
+        font-body-sm
+        text-[12px]
+        text-on-surface-variant
+        truncate
+    ">
+        Timeline:
+        ${escapeHtml(timeline)}
+    </span>
 
-            </div>
+    <button
+        type="button"
+        class="
+            delete-project-btn
+            flex
+            items-center
+            gap-1
+            px-3
+            py-1.5
+            rounded-lg
+            text-error
+            hover:bg-error-container
+            transition-colors
+            text-[12px]
+            font-semibold
+            flex-shrink-0
+        "
+        title="Delete project"
+    >
+        <span class="
+            material-symbols-outlined
+            text-[17px]
+        ">
+            delete
+        </span>
+        Delete
+    </button>
 
+</div>
         `;
 
     }
@@ -1205,7 +1636,38 @@ function createProjectCard(project) {
 
     }
 
+// =====================================================
+// DELETE BUTTON
+// =====================================================
 
+const deleteButton =
+    article.querySelector(
+        ".delete-project-btn"
+    );
+
+
+if (deleteButton) {
+
+    deleteButton.addEventListener(
+        "click",
+        async function (event) {
+
+            // IMPORTANT:
+            // Prevent the card click from opening
+            // the project details page.
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            await deleteProject(
+                projectId,
+                projectName
+            );
+
+        }
+    );
+
+}
     // =====================================================
     // CARD CLICK
     // =====================================================

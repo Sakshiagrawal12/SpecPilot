@@ -486,7 +486,7 @@
         </div>
 
     </div>
-
+    
 
     <!-- =============================================
          NAVIGATION
@@ -1535,27 +1535,25 @@
                                 class="content-card lg:col-span-2"
                             >
 
-                                <div class="card-header">
-
-                                    <span
-                                        class="
-                                            material-symbols-outlined
-                                            text-primary
-                                        "
-                                    >
+                                <div class="card-header flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">
                                         overview
                                     </span>
-
-
-                                    <h3
-                                        class="
-                                            font-semibold
-                                        "
-                                    >
-                                        Overview
-                                    </h3>
-
+                                    <h3 class="font-semibold">Overview</h3>
                                 </div>
+
+                                <button
+                                    type="button"
+                                    class="edit-button text-xs font-semibold px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors flex items-center gap-1.5"
+                                    data-section="overview"
+                                >
+                                    <span class="material-symbols-outlined text-[16px]">
+                                        edit
+                                    </span>
+                                    Edit
+                                </button>
+                            </div>
 
 
                                 <div
@@ -1575,28 +1573,29 @@
                             <article
                                 class="content-card"
                             >
+                            <div class="card-header flex items-center justify-between">
+                            <!-- Left side: icon + heading -->
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">
+                                    report_problem
+                                </span>
+                                <h3 class="font-semibold">Problem Statement</h3>
+                            </div>
 
-                                <div class="card-header">
+                            <!-- Right side: Edit button -->
+                            <button
+                                type="button"
+                                class="edit-button text-xs font-semibold px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors flex items-center gap-1.5"
+                                data-section="problem_statement"
+                            >
+                                <span class="material-symbols-outlined text-[16px]">
+                                    edit
+                                </span>
+                                Edit
+                            </button>
+                        </div>
 
-                                    <span
-                                        class="
-                                            material-symbols-outlined
-                                            text-primary
-                                        "
-                                    >
-                                        report_problem
-                                    </span>
 
-
-                                    <h3
-                                        class="
-                                            font-semibold
-                                        "
-                                    >
-                                        Problem Statement
-                                    </h3>
-
-                                </div>
 
 
                                 <div
@@ -1617,28 +1616,25 @@
                                 class="content-card"
                             >
 
-                                <div class="card-header">
-
-                                    <span
-                                        class="
-                                            material-symbols-outlined
-                                            text-primary
-                                        "
-                                    >
+                                <div class="card-header flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">
                                         lightbulb
                                     </span>
-
-
-                                    <h3
-                                        class="
-                                            font-semibold
-                                        "
-                                    >
-                                        Proposed Solution
-                                    </h3>
-
+                                    <h3 class="font-semibold">Proposed Solution</h3>
                                 </div>
 
+                                <button
+                                    type="button"
+                                    class="edit-button text-xs font-semibold px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors flex items-center gap-1.5"
+                                    data-section="proposed_solution"
+                                >
+                                    <span class="material-symbols-outlined text-[16px]">
+                                        edit
+                                    </span>
+                                    Edit
+                                </button>
+                            </div>
 
                                 <div
                                     id="solutionContent"
@@ -1658,28 +1654,25 @@
                                 class="content-card"
                             >
 
-                                <div class="card-header">
-
-                                    <span
-                                        class="
-                                            material-symbols-outlined
-                                            text-primary
-                                        "
-                                    >
+                               <div class="card-header flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">
                                         groups
                                     </span>
-
-
-                                    <h3
-                                        class="
-                                            font-semibold
-                                        "
-                                    >
-                                        Target Audience
-                                    </h3>
-
+                                    <h3 class="font-semibold">Target Audience</h3>
                                 </div>
 
+                                <button
+                                    type="button"
+                                    class="edit-button text-xs font-semibold px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors flex items-center gap-1.5"
+                                    data-section="target_audience"
+                                >
+                                    <span class="material-symbols-outlined text-[16px]">
+                                        edit
+                                    </span>
+                                    Edit
+                                </button>
+                            </div>
 
                                 <div
                                     id="targetAudienceContent"
@@ -1699,27 +1692,25 @@
                                 class="content-card"
                             >
 
-                                <div class="card-header">
-
-                                    <span
-                                        class="
-                                            material-symbols-outlined
-                                            text-primary
-                                        "
-                                    >
+                                <div class="card-header flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">
                                         trending_up
                                     </span>
-
-
-                                    <h3
-                                        class="
-                                            font-semibold
-                                        "
-                                    >
-                                        Business Value
-                                    </h3>
-
+                                    <h3 class="font-semibold">Business Value</h3>
                                 </div>
+
+                                <button
+                                    type="button"
+                                    class="edit-button text-xs font-semibold px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors flex items-center gap-1.5"
+                                    data-section="business_value"
+                                >
+                                    <span class="material-symbols-outlined text-[16px]">
+                                        edit
+                                    </span>
+                                    Edit
+                                </button>
+                            </div>
 
 
                                 <div
@@ -1739,28 +1730,26 @@
                             <article
                                 class="content-card lg:col-span-2"
                             >
+                            <div class="card-header flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">
+                                    featured_play_list
+                                </span>
+                                <h3 class="font-semibold">Major Features</h3>
+                            </div>
 
-                                <div class="card-header">
-
-                                    <span
-                                        class="
-                                            material-symbols-outlined
-                                            text-primary
-                                        "
-                                    >
-                                        feature_search
-                                    </span>
-
-
-                                    <h3
-                                        class="
-                                            font-semibold
-                                        "
-                                    >
-                                        Major Features
-                                    </h3>
-
-                                </div>
+                            <button
+                                type="button"
+                                class="edit-button text-xs font-semibold px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors flex items-center gap-1.5"
+                                data-section="major_features"
+                            >
+                                <span class="material-symbols-outlined text-[16px]">
+                                    edit
+                                </span>
+                                Edit
+                            </button>
+                        </div>
+                                
 
 
                                 <div
@@ -1781,27 +1770,25 @@
                                 class="content-card lg:col-span-2"
                             >
 
-                                <div class="card-header">
-
-                                    <span
-                                        class="
-                                            material-symbols-outlined
-                                            text-primary
-                                        "
-                                    >
-                                        task_alt
+                                <div class="card-header flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">
+                                        check_circle
                                     </span>
-
-
-                                    <h3
-                                        class="
-                                            font-semibold
-                                        "
-                                    >
-                                        Expected Outcome
-                                    </h3>
-
+                                    <h3 class="font-semibold">Expected Outcome</h3>
                                 </div>
+
+                                <button
+                                    type="button"
+                                    class="edit-button text-xs font-semibold px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors flex items-center gap-1.5"
+                                    data-section="expected_outcome"
+                                >
+                                    <span class="material-symbols-outlined text-[16px]">
+                                        edit
+                                    </span>
+                                    Edit
+                                </button>
+                            </div>
 
 
                                 <div
@@ -1826,7 +1813,7 @@
                      PRD TAB
                 ====================================== -->
 
-                <section
+                 <section
                     id="prdTab"
                     class="hidden py-8"
                 >
@@ -2144,46 +2131,66 @@
 
                         </article>
 
-
                         <!-- User Workflows -->
+<article class="content-card">
 
-                        <article
-                            class="content-card"
-                        >
+    <div class="card-header flex items-center justify-between">
 
-                            <div class="card-header">
+        <div class="flex items-center gap-3">
 
-                                <span
-                                    class="
-                                        material-symbols-outlined
-                                        text-primary
-                                    "
-                                >
-                                    account_tree
-                                </span>
+            <span class="material-symbols-outlined text-primary">
+                account_tree
+            </span>
 
+            <h3 class="font-semibold">
+                User Workflows
+            </h3>
 
-                                <h3
-                                    class="
-                                        font-semibold
-                                    "
-                                >
-                                    User Workflows
-                                </h3>
-
-                            </div>
+        </div>
 
 
-                            <div
-                                id="prdUserWorkflows"
-                                class="content-text"
-                            >
-                                <div class="empty-content">
-                                    Content not generated yet.
-                                </div>
-                            </div>
+        <!-- Diagram Toggle -->
 
-                        </article>
+        <button
+            type="button"
+            id="convertWorkflowDiagramBtn"
+            class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-primary text-primary hover:bg-primary-container transition-colors flex items-center gap-1.5"
+        >
+
+            <span class="material-symbols-outlined text-[16px]">
+                schema
+            </span>
+
+            <span id="convertBtnText">
+                Convert to Diagram
+            </span>
+
+        </button>
+
+    </div>
+
+
+    <!-- Workflow Text -->
+
+    <div
+        id="prdUserWorkflows"
+        class="content-text"
+    >
+        <div class="empty-content">
+            Content not generated yet.
+        </div>
+    </div>
+
+
+    <!-- Workflow Diagram -->
+
+    <div
+        id="prdUserWorkflowsDiagram"
+        class="hidden pt-2 overflow-x-auto"
+    ></div>
+
+</article>
+                       
 
 
                         <!-- Business Rules -->
@@ -2352,6 +2359,7 @@
                     </div>
 
                 </section>
+
 
 
 
@@ -2666,11 +2674,21 @@
     src="../js/auth.js"
 ></script>
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<!-- Mermaid.js converts Mermaid syntax into SVG diagrams -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: false, theme: 'default' });
+</script>
 
 <!-- =====================================================
      PROJECT DETAILS CONTROLLER
 ====================================================== -->
-
+<script
+    type="module"
+    src="./js/project-details/prd.js"
+></script>
 <script
     type="module"
     src="../js/project-details/project-details.js"

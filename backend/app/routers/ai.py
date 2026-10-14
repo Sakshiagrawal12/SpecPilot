@@ -18,10 +18,54 @@ from app.ai.prd import prd_generator
 from app.ai.task_generator import task_generator
 from app.ai.sprint_generator import sprint_generator
 
-from app.agent.runner import (
-    create_empty_requirements,
-    process_message
-)
+# =========================================================
+# ORCHESTRATOR (replaces the old app.agent.runner import)
+# =========================================================
+
+from app.agents.orchestrator.graph import orchestrator
+from app.agents.requirement_manager.utils import create_empty_requirements
+
+
+def process_message(project_id, user_message: str, requirements: dict) -> dict:
+    """
+    Runs one turn through the orchestrator, stateless — same calling
+    shape the old app.agent.runner.process_message() had, so nothing
+    below this function needs to change. Requirement Manager handles
+    the interview; once it signals completion the orchestrator hands
+    off with next_action == "generate_prd" (Generation Manager itself
+    runs separately, via /generation/run/{project_id}, since it needs
+    the real DB Project row).
+    """
+
+    project_name = (requirements.get("project_name") or {}).get("value")
+
+    orchestrator_state = {
+        "session_id": f"ai-{project_id}",
+        "project_id": project_id,
+        "project_name": project_name,
+        "user_message": user_message,
+        "requirement_state": {
+            "requirements": requirements,
+            "project_name": project_name,
+            "project_id": project_id,
+        },
+        "generation_state": {},
+        "verification_state": {},
+    }
+
+    result = orchestrator.invoke(orchestrator_state)
+    requirement_state = result.get("requirement_state") or {}
+
+    return {
+        "agent_response": result.get("agent_response", ""),
+        "next_action": result.get("next_action", "wait_for_user"),
+        "requirements": requirement_state.get("requirements", requirements),
+        "current_field": requirement_state.get("current_field"),
+        "completeness_status": requirement_state.get("completeness_status", "INCOMPLETE"),
+        "completeness_score": requirement_state.get("completeness_score", 0),
+        "missing_fields": requirement_state.get("missing_fields", []),
+    }
+
 
 # =========================================================
 # ROUTER
@@ -250,12 +294,13 @@ def agent_chat(
 
 
     # =====================================================
-    # 8. RUN LANGGRAPH AGENT
+    # 8. RUN AGENT (via orchestrator)
     # =====================================================
 
     try:
 
         result = process_message(
+            project_id=project_id,
             user_message=message,
             requirements=requirements
         )

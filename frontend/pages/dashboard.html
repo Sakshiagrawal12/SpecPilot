@@ -183,6 +183,7 @@
             }
         }
     </script>
+<!-- ========================================================= GLOBAL + MOBILE SIDEBAR CSS IMPORTANT: The sidebar itself is shared through sidebar.js. This CSS only controls its responsive behavior. ========================================================== -->
 
     <style>
         ::-webkit-scrollbar {
@@ -202,111 +203,339 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #c7c4d7;
         }
-    </style>
-</head>
+        /* =====================================================
+   SIDEBAR
+===================================================== */
 
+/* =====================================================
+       MOBILE SIDEBAR
+       
+       Desktop:
+       Tailwind handles the sidebar.
+       
+       Mobile:
+       Sidebar becomes an off-canvas drawer.
+    ====================================================== */
+
+    @media (max-width: 767px) {
+
+        /* ---------------------------------------------
+           MAIN SIDEBAR
+        --------------------------------------------- */
+
+        #mainSidebar {
+            display: flex;
+
+            position: fixed;
+
+            top: 0;
+            left: 0;
+
+            width: min(280px, 85vw);
+            height: 100vh;
+
+            transform: translateX(-100%);
+
+            transition:
+                transform 0.25s ease;
+
+            z-index: 50;
+
+            box-shadow:
+                8px 0 30px rgba(0, 0, 0, 0.15);
+
+            overflow-y: auto;
+
+            background: #ffffff;
+        }
+
+
+        /* ---------------------------------------------
+           SIDEBAR OPEN
+        --------------------------------------------- */
+
+        #mainSidebar.mobile-sidebar-open {
+            transform: translateX(0);
+        }
+
+
+        /* ---------------------------------------------
+           SIDEBAR NAVIGATION
+        --------------------------------------------- */
+
+        #mainSidebar nav {
+            overflow-y: auto;
+        }
+
+
+        /* ---------------------------------------------
+           MOBILE CLOSE BUTTON
+        --------------------------------------------- */
+
+        #mobileSidebarClose {
+            display: flex;
+        }
+
+
+        /* ---------------------------------------------
+           OVERLAY
+        --------------------------------------------- */
+
+        #mobileSidebarOverlay {
+            display: none;
+        }
+
+        #mobileSidebarOverlay.mobile-overlay-visible {
+            display: block;
+        }
+
+
+        /* ---------------------------------------------
+           PREVENT BACKGROUND SCROLL
+        --------------------------------------------- */
+
+        body.mobile-sidebar-active {
+            overflow: hidden;
+        }
+
+
+        /* ---------------------------------------------
+           MAIN CONTENT
+           
+           Your existing:
+           md:ml-sidebar-width
+           
+           automatically stops applying below md.
+        --------------------------------------------- */
+
+        .mobile-main-content {
+            margin-left: 0;
+            width: 100%;
+        }
+
+
+        /* ---------------------------------------------
+           MOBILE TOP HEADER
+        --------------------------------------------- */
+
+        #mobileMenuButton {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+
+    /* =====================================================
+       DESKTOP
+    ====================================================== */
+
+    @media (min-width: 768px) {
+
+        #mobileSidebarOverlay {
+            display: none !important;
+        }
+
+        #mobileSidebarClose {
+            display: none !important;
+        }
+
+        #mobileMenuButton {
+            display: none !important;
+        }
+    }
+
+</style>
+
+</head>
 
 <body class="bg-background text-on-background font-body-md min-h-screen flex text-body-md overflow-x-hidden">
 
 
-    <!-- ========================================================= -->
-    <!-- SIDEBAR -->
-    <!-- ========================================================= -->
 
-    <aside
-        class="w-sidebar-width h-screen fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant hidden md:flex flex-col z-20"
-    >
-        <div class="flex items-center gap-3 mb-8 px-2 mt-2">
+<!-- =========================================================
+     MOBILE SIDEBAR OVERLAY
+========================================================= -->
 
-            <div
-                class="w-8 h-8
-                    rounded-full
-                    bg-primary-container
-                    flex items-center justify-center
-                    text-on-primary-container"
+<div
+    id="mobileSidebarOverlay"
+    class="fixed inset-0 bg-black/40 z-40 hidden md:hidden"
+></div>
+
+
+<!-- =========================================================
+     SHARED SIDEBAR
+     
+     Same sidebar for:
+     - Desktop
+     - Mobile
+========================================================= -->
+
+<aside
+    id="mainSidebar"
+    class="w-sidebar-width h-screen fixed left-0 top-0
+           bg-surface-container-lowest
+           border-r border-outline-variant
+           hidden md:flex flex-col z-50"
+>
+
+    <!-- =====================================================
+         BRAND
+    ====================================================== -->
+
+    <div class="flex items-center gap-3 px-4 py-4 border-b border-outline-variant">
+
+        <!-- Logo -->
+
+        <div
+            class="w-8 h-8
+                   rounded-full
+                   bg-primary-container
+                   flex items-center justify-center
+                   text-on-primary-container
+                   flex-shrink-0"
+        >
+            <span class="material-symbols-outlined text-[20px]">
+                rocket_launch
+            </span>
+        </div>
+
+
+        <!-- Brand Text -->
+
+        <div class="min-w-0">
+
+            <h1
+                class="font-headline-md
+                       text-headline-md
+                       font-bold
+                       text-primary"
             >
-                <span
-                    class="material-symbols-outlined text-[20px]"
-                    data-icon="rocket_launch"
-                >
-                    rocket_launch
-                </span>
-            </div>
+                SpecPilot
+            </h1>
 
-            <div>
-
-                <h1
-                    class="font-headline-md
-                        text-headline-md
-                        font-bold
-                        text-primary"
-                >
-                    SpecPilot
-                </h1>
-
-                <p
-                    class="font-label-sm
-                        text-label-sm
-                        text-on-surface-variant"
-                >
-                    AI Project Manager
-                </p>
-
-            </div>
+            <p
+                class="font-label-sm
+                       text-label-sm
+                       text-on-surface-variant"
+            >
+                AI Project Manager
+            </p>
 
         </div>
 
 
-        <!-- Navigation -->
+        <!-- Mobile Close Button -->
 
-        <nav class="flex-1 px-unit-md space-y-1">
+        <button
+            id="mobileSidebarClose"
+            type="button"
+            aria-label="Close navigation"
+            class="md:hidden ml-auto
+                   p-2
+                   rounded-full
+                   text-on-surface-variant
+                   hover:bg-surface-container-high
+                   transition-colors"
+        >
+            <span class="material-symbols-outlined">
+                close
+            </span>
+        </button>
 
-            <!-- Dashboard -->
-
-            <a
-                href="dashboard.html"
-                class="flex items-center gap-3 bg-secondary-container text-on-secondary-container rounded-lg px-4 py-3 border-l-4 border-primary transition-colors duration-200 shadow-sm relative overflow-hidden group"
-            >
-
-                <span class="material-symbols-outlined text-primary">
-                    dashboard
-                </span>
-
-                <span
-                    class="font-label-md text-label-md font-bold text-primary"
-                >
-                    Dashboard
-                </span>
-
-            </a>
+    </div>
 
 
-            <!-- Projects -->
+    <!-- =====================================================
+         NAVIGATION
+    ====================================================== -->
 
-            <a
-                href="project-details.html"
-                class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
-            >
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
 
-                <span
-                    class="material-symbols-outlined text-outline group-hover:text-primary transition-colors"
-                >
-                    folder_open
-                </span>
 
-                <span class="font-label-md text-label-md">
-                    Projects
-                </span>
+        <!-- Dashboard -->
 
-            </a>
-
-             <a
-            class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
-            
-            href="agent.html"
+        <a
+            href="dashboard.html"
+            data-page="dashboard"
+            class="sidebar-link
+                   flex items-center gap-3
+                   text-on-surface-variant
+                   hover:bg-surface-container-high
+                   hover:text-primary
+                   transition-colors duration-200
+                   px-4 py-3
+                   rounded-lg
+                   group"
         >
 
-            <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">
+            <span
+                class="material-symbols-outlined
+                       text-outline
+                       group-hover:text-primary"
+            >
+                dashboard
+            </span>
+
+            <span class="font-label-md text-label-md">
+                Dashboard
+            </span>
+
+        </a>
+
+
+        <!-- Projects -->
+
+        <a
+            href="project-details.html"
+            data-page="project-details"
+            class="sidebar-link
+                   flex items-center gap-3
+                   text-on-surface-variant
+                   hover:bg-surface-container-high
+                   hover:text-primary
+                   transition-colors duration-200
+                   px-4 py-3
+                   rounded-lg
+                   group"
+        >
+
+            <span
+                class="material-symbols-outlined
+                       text-outline
+                       group-hover:text-primary"
+            >
+                folder_open
+            </span>
+
+            <span class="font-label-md text-label-md">
+                Projects
+            </span>
+
+        </a>
+
+
+        <!-- AI Agent -->
+
+        <a
+            href="agent.html"
+            data-page="agent"
+            class="sidebar-link
+                   flex items-center gap-3
+                   text-on-surface-variant
+                   hover:bg-surface-container-high
+                   hover:text-primary
+                   transition-colors duration-200
+                   px-4 py-3
+                   rounded-lg
+                   group"
+        >
+
+            <span
+                class="material-symbols-outlined
+                       text-outline
+                       group-hover:text-primary"
+            >
                 smart_toy
             </span>
 
@@ -315,115 +544,238 @@
             </span>
 
         </a>
-            <!-- Feedback -->
 
-            <a
-                href="feedback.html"
-                class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
+
+        <!-- Feedback -->
+
+        <a
+            href="feedback.html"
+            data-page="feedback"
+            class="sidebar-link
+                   flex items-center gap-3
+                   text-on-surface-variant
+                   hover:bg-surface-container-high
+                   hover:text-primary
+                   transition-colors duration-200
+                   px-4 py-3
+                   rounded-lg
+                   group"
+        >
+
+            <span
+                class="material-symbols-outlined
+                       text-outline
+                       group-hover:text-primary"
             >
+                feedback
+            </span>
 
-                <span
-                    class="material-symbols-outlined text-outline group-hover:text-primary transition-colors"
-                >
-                    feedback
-                </span>
+            <span class="font-label-md text-label-md">
+                Feedback
+            </span>
 
-                <span class="font-label-md text-label-md">
-                    Feedback
-                </span>
-
-            </a>
+        </a>
 
 
+        <!-- Settings -->
 
-            <!-- Settings -->
+        <a
+            href="#"
+            data-page="settings"
+            class="sidebar-link
+                   flex items-center gap-3
+                   text-on-surface-variant
+                   hover:bg-surface-container-high
+                   hover:text-primary
+                   transition-colors duration-200
+                   px-4 py-3
+                   rounded-lg
+                   group"
+        >
 
-            <a
-                href="#"
-                class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group"
+            <span
+                class="material-symbols-outlined
+                       text-outline
+                       group-hover:text-primary"
             >
+                settings
+            </span>
 
-                <span
-                    class="material-symbols-outlined text-outline group-hover:text-primary transition-colors"
-                >
-                    settings
-                </span>
+            <span class="font-label-md text-label-md">
+                Settings
+            </span>
 
-                <span class="font-label-md text-label-md">
-                    Settings
-                </span>
-
-            </a>
-
-        </nav>
+        </a>
 
 
-        <!-- ===================================================== -->
-        <!-- SIDEBAR NEW PROJECT ONLY -->
-        <!-- ===================================================== -->
+        <!-- =================================================
+             CURRENT PROJECT
+        ================================================== -->
 
-        <div class="p-unit-md mt-auto">
+        <div
+            id="sidebarCurrentProject"
+            class="mt-5 mx-1 p-3
+                   rounded-lg
+                   bg-surface-container-low
+                   border border-outline-variant"
+        >
 
-            <button
-                id="newProjectBtn"
-                type="button"
-                class="w-full bg-primary hover:bg-[#3730a3] text-on-primary font-label-md text-label-md py-3 px-4 rounded-[12px] flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all duration-200 active:scale-95"
+            <div
+                class="text-[10px]
+                       font-bold
+                       tracking-wider
+                       text-on-surface-variant
+                       mb-1"
             >
+                CURRENT PROJECT
+            </div>
 
-                <span class="material-symbols-outlined text-[18px]">
-                    add
-                </span>
-
-                New Project
-
-            </button>
+            <div
+                id="sidebarProjectName"
+                class="text-sm
+                       font-semibold
+                       text-on-surface
+                       break-words"
+            >
+                No project selected
+            </div>
 
         </div>
 
-    </aside>
+    </nav>
 
 
+    <!-- =====================================================
+         BOTTOM SECTION
+    ====================================================== -->
 
-    <!-- ========================================================= -->
-    <!-- MAIN CONTENT -->
-    <!-- ========================================================= -->
+    <div
+        class="p-3
+               border-t
+               border-outline-variant
+               space-y-2"
+    >
 
-    <div class="flex-1 flex flex-col md:ml-sidebar-width min-h-screen">
+        <!-- New Project -->
 
-
-        <!-- ===================================================== -->
-        <!-- TOP NAVBAR -->
-        <!-- ===================================================== -->
-
-        <header
-            class="sticky top-0 z-30 h-16 bg-surface/90 backdrop-blur-md border-b border-outline-variant flex items-center w-full px-4 md:px-8"
+        <button
+            id="newProjectBtn"
+            type="button"
+            class="w-full
+                   bg-primary
+                   hover:bg-[#3730a3]
+                   text-on-primary
+                   font-label-md
+                   text-label-md
+                   py-3
+                   px-4
+                   rounded-[12px]
+                   flex
+                   items-center
+                   justify-center
+                   gap-2
+                   shadow-sm
+                   hover:shadow-md
+                   transition-all
+                   duration-200
+                   active:scale-95"
         >
 
-            <!-- Mobile Brand -->
+            <span class="material-symbols-outlined text-[18px]">
+                add
+            </span>
 
-            <div class="md:hidden flex items-center gap-3">
+            New Project
 
-                <button
-                    type="button"
-                    class="text-on-surface-variant hover:bg-surface-container-highest p-2 rounded-full"
-                >
-
-                    <span class="material-symbols-outlined">
-                        menu
-                    </span>
-
-                </button>
-
-                <h1
-                    class="font-headline-md text-headline-md font-bold text-primary"
-                >
-                    SpecPilot
-                </h1>
-
-            </div>
+        </button>
 
 
-            <!-- Search -->
+        <!-- Profile -->
+
+        <button
+            type="button"
+            id="sidebarProfileButton"
+            class="sidebar-link
+                   sidebar-button
+                   w-full
+                   flex items-center gap-3
+                   text-on-surface-variant
+                   hover:bg-surface-container-high
+                   hover:text-primary
+                   px-4 py-3
+                   rounded-lg
+                   transition-colors"
+        >
+
+            <span class="material-symbols-outlined">
+                account_circle
+            </span>
+
+            <span class="font-label-md text-label-md">
+                Profile
+            </span>
+
+        </button>
+
+
+        <!-- Logout -->
+
+        <button
+            type="button"
+            id="sidebarLogoutButton"
+            class="sidebar-link
+                   sidebar-button
+                   w-full
+                   flex items-center gap-3
+                   text-on-surface-variant
+                   hover:bg-error-container
+                   hover:text-error
+                   px-4 py-3
+                   rounded-lg
+                   transition-colors"
+        >
+
+            <span class="material-symbols-outlined">
+                logout
+            </span>
+
+            <span class="font-label-md text-label-md">
+                Logout
+            </span>
+
+        </button>
+
+    </div>
+
+</aside>
+
+
+    <!-- =========================================================
+         PAGE CONTENT WRAPPER
+         Pushed right of the fixed sidebar on desktop
+         (md:ml-sidebar-width). Full width on mobile.
+    ========================================================= -->
+
+    <div class="flex-1 flex flex-col min-h-screen md:ml-sidebar-width mobile-main-content">
+
+        <header
+            class="sticky top-0 z-10 flex items-center gap-3 px-margin-mobile md:px-margin-desktop py-3 bg-surface-container-lowest/90 backdrop-blur border-b border-outline-variant"
+        >
+
+            <!-- Mobile Menu Button -->
+
+            <button
+                id="mobileMenuButton"
+                type="button"
+                aria-label="Open navigation"
+                class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+            >
+                <span class="material-symbols-outlined">
+                    menu
+                </span>
+            </button>
+
+      <!-- Search -->
 
             <div
                 class="hidden md:flex flex-1 max-w-md relative group"
@@ -558,20 +910,20 @@
         </div>
 
         <button
-            id="signOutBtn"
-            type="button"
-            class="w-full flex items-center gap-3 px-4 py-3 text-left text-error hover:bg-error-container transition-colors"
-        >
+                            id="signOutBtn"
+                            type="button"
+                            class="w-full flex items-center gap-3 px-4 py-3 text-left text-error hover:bg-error-container transition-colors"
+                        >
 
-            <span class="material-symbols-outlined text-[20px]">
-                logout
-            </span>
+                            <span class="material-symbols-outlined text-[20px]">
+                                logout
+                            </span>
 
-            <span class="font-label-md text-label-md">
-                Sign Out
-            </span>
+                            <span class="font-label-md text-label-md">
+                                Sign Out
+                            </span>
 
-        </button>
+                        </button>
 
     </div>
 
@@ -708,6 +1060,7 @@
         </main>
 
     </div>
+    <!-- closes .mobile-main-content wrapper -->
 
 
 
@@ -725,6 +1078,7 @@
     <!-- Dashboard JS -->
 
     <script src="../js/dashboard.js"></script>
+    <script src="../js/sidebar.js"></script>
 
 </body>
 

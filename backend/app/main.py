@@ -13,6 +13,8 @@ from app.routers import tasks
 from app.routers import auth
 from app.routers.agent import router as agent_router
 from app.routers.project import router as projects_router
+from app.routers.generation import router as generation_router
+ 
 # =========================================================
 # DATABASE & DIRECTORIES
 # =========================================================
@@ -20,7 +22,10 @@ from app.routers.project import router as projects_router
 Base.metadata.create_all(
     bind=engine
 )
-
+origins = [
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+]
 
 
 # =========================================================
@@ -40,7 +45,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -68,7 +73,9 @@ app.include_router(
     tasks.router
 )
 
-
+app.include_router(
+    generation_router
+)
 
 app.include_router(
     auth.router

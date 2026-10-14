@@ -378,7 +378,9 @@
                 </span>
 
             </a>
-
+            
+            
+            
     </nav>
 
 
@@ -488,6 +490,7 @@
     class="flex items-center justify-between mb-6 pb-4 border-b border-outline-variant"
 >
 
+
     <div>
 
         <h2
@@ -503,11 +506,20 @@
         </p>
 
     </div>
-
-
+    <div class="flex items-center gap-3">
+        <!-- EDIT DETAILS BUTTON -->
+        <button
+            id="openEditModalBtn"
+            class="flex items-center gap-2 px-3 py-2 border border-outline-variant rounded-DEFAULT font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors shadow-sm"
+        >
+            <span class="material-symbols-outlined text-[20px]">edit</span>
+            <span>Edit Details</span>
+        </button>
+</div>
     <!-- PROJECT SELECT -->
 
     <div class="relative">
+        
 
         <select
             id="projectSelect"
@@ -591,7 +603,7 @@
     class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0px_4px_12px_rgba(15,23,42,0.05)] p-2 flex items-end gap-2 focus-within:ring-2 focus-within:ring-primary-container/20 transition-all"
 >
 
-    <button
+      <button
         id="attachButton"
         type="button"
         class="p-3 text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors rounded-lg flex-shrink-0"
@@ -602,6 +614,13 @@
         </span>
 
     </button>
+
+    <input
+        type="file"
+        id="documentUploadInput"
+        accept=".pdf,.docx,.doc,.csv,.xml,.json,.txt,.md"
+        class="hidden"
+    />
 
 
     <div class="flex-1 min-h-[56px] relative">
@@ -641,23 +660,35 @@
 
     
 </button>
+<!-- =========================================================
+     PRD ACTION
+========================================================= -->
 
-<button
-    type="button"
-    id="generatePrdButton"
-    class="hidden flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-on-primary hover:opacity-90 transition-colors"
+<div
+    class="flex justify-end mb-3"
 >
-    <span class="material-symbols-outlined text-[20px]">
-        description
-    </span>
 
-    <span>
-        Generate PRD Report
-    </span>
-</button>
+    <button
+        type="button"
+        id="generatePrdButton"
+        class="hidden items-center gap-2 px-4 py-2 rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-colors"
+    >
+
+        <span class="material-symbols-outlined text-[20px]">
+            description
+        </span>
+
+        <span>
+            Generate PRD Report
+        </span>
+
+    </button>
+
 </div>
 
 
+
+</div>
 <div class="text-center mt-2">
 
     <span
