@@ -6,31 +6,51 @@ from app.ai.llm import llm
 
 class SprintReviewAgent:
 
-    def _extract_json(
-        self,
-        response: str,
-    ) -> Dict[str, Any]:
+    @staticmethod
+    def _strip_fences(text: str) -> str:
+        text = text.strip()
 
-        response = response.strip()
-
-        if response.startswith("```"):
-
-            response = (
-                response
-                .replace("```json", "")
+        if text.startswith("```"):
+            text = (
+                text.replace("```json", "")
                 .replace("```", "")
                 .strip()
             )
 
-        try:
+        return text
 
-            return json.loads(response)
+    def _extract_json(self, response: str) -> Dict[str, Any]:
+        text = self._strip_fences(response)
 
-        except json.JSONDecodeError as exc:
+        candidates = [text]
 
-            raise ValueError(
-                f"Sprint Review Agent returned invalid JSON: {exc}"
-            )
+        start, end = text.find("{"), text.rfind("}")
+        if start != -1 and end > start:
+            candidates.append(text[start:end + 1])
+
+        last_error = None
+
+        for candidate in candidates:
+            try:
+                result = json.loads(candidate)
+            except json.JSONDecodeError as exc:
+                last_error = exc
+                continue
+
+            if isinstance(result, dict):
+                return result
+
+        raise ValueError(
+            f"Sprint Review Agent returned invalid JSON: {last_error}"
+        )
+
+    @staticmethod
+    def _failed(issue: str, suggestion: str) -> Dict[str, Any]:
+        return {
+            "status": "FAIL",
+            "issues": [issue],
+            "suggestions": [suggestion],
+        }
 
     def review(
         self,
@@ -39,6 +59,13 @@ class SprintReviewAgent:
         capacity_plan,
         dependency_plan,
     ) -> Dict[str, Any]:
+
+        # A missing input is reported clearly instead of crashing the flow
+        if dependency_plan is None:
+            return self._failed(
+                "No dependency plan was provided to the review.",
+                "Run dependency analysis before the sprint review.",
+            )
 
         prompt = f"""
 You are a Sprint Plan Review Agent.
@@ -75,6 +102,8 @@ PASS if the plan is acceptable.
 
 FAIL if meaningful problems exist.
 
+Keep each issue and suggestion to one short sentence.
+
 Return ONLY valid JSON.
 
 Structure:
@@ -86,22 +115,35 @@ Structure:
 }}
 """
 
-        response = llm.generate(prompt)
+        result = None
 
-        result = self._extract_json(response)
+        for attempt in (1, 2):
+            try:
+                result = self._extract_json(llm.generate(prompt))
+                break
+            except ValueError as exc:
+                print(f"SPRINT REVIEW attempt {attempt} failed: {exc}")
 
-        status = result.get(
-            "status",
-            "FAIL",
-        )
+        if result is None:
+            return self._failed(
+                "The review could not be completed because the reply was invalid.",
+                "Run the review again.",
+            )
+
+        status = result.get("status", "FAIL")
 
         if status not in {"PASS", "FAIL"}:
             status = "FAIL"
 
+        issues = result.get("issues", [])
+        suggestions = result.get("suggestions", [])
+
         return {
             "status": status,
-            "issues": result.get("issues", []),
-            "suggestions": result.get("suggestions", []),
+            "issues": issues if isinstance(issues, list) else [str(issues)],
+            "suggestions": (
+                suggestions if isinstance(suggestions, list) else [str(suggestions)]
+            ),
         }
 
 

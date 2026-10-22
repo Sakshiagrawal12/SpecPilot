@@ -5,8 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.database import engine
+from app.routers import codebase
 from app.models import Base
-
+from app.routers import audio
 from app.routers import project
 from app.routers import ai
 from app.routers import tasks
@@ -14,7 +15,10 @@ from app.routers import auth
 from app.routers.agent import router as agent_router
 from app.routers.project import router as projects_router
 from app.routers.generation import router as generation_router
- 
+from pathlib import Path
+from fastapi.responses import FileResponse
+
+
 # =========================================================
 # DATABASE & DIRECTORIES
 # =========================================================
@@ -84,6 +88,10 @@ app.include_router(
 app.include_router(agent_router)
 
 app.include_router(projects_router)
+
+app.include_router(audio.router)
+app.include_router(codebase.router)
+
 # =========================================================
 # HOME
 # =========================================================
@@ -95,3 +103,11 @@ def home():
     }
 
 
+
+@app.get("/audio-test", include_in_schema=False)
+def audio_test_page():
+    return FileResponse(Path(__file__).parent / "audio_test.html")
+
+@app.get("/codebase-test", include_in_schema=False)
+def codebase_test_page():
+    return FileResponse(Path(__file__).parent / "codebase_test.html")

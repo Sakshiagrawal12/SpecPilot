@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code Spec | SpecPilot</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f9fb; --card: #ffffff; --ink: #1c2530; --muted: #5d6b7a; --line: #dfe3ea;
+    --primary: #4338ca; --primary-ink: #ffffff; --primary-soft: #eceafb;
+    --bad: #b3261e; --bad-soft: #fbe9e7; --good: #1f7a46; --warn: #b4531a;
+    --code-bg: #101820; --code-ink: #d6e2ee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151c; --card: #1a1f29; --ink: #e6eaf0; --muted: #9aa6b5; --line: #2c3442;
+      --primary: #8b86f0; --primary-ink: #12151c; --primary-soft: #272a4a;
+      --bad: #ff8a80; --bad-soft: #3a1f1d; --good: #6fd09a; --warn: #f0a070;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 Inter, "Segoe UI", system-ui, sans-serif; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 18px 90px; }
+  .top { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .back { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); text-decoration: none; padding: 6px 10px; border-radius: 8px; border: 0; background: none; cursor: pointer; font: inherit; }
+  .back:hover { background: var(--primary-soft); color: var(--primary); }
+  h1 { font-size: 24px; margin: 0; }
+  .sub { color: var(--muted); margin: 2px 0 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(15,23,42,.04); }
+  .card h2 { font-size: 16px; margin: 0 0 4px; }
+  .muted { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+  .tabs { display: inline-flex; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 3px; margin-bottom: 16px; }
+  .tabs button { border: 0; background: none; color: var(--muted); font: inherit; padding: 7px 16px; border-radius: 8px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--primary); color: var(--primary-ink); }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 5px; }
+  input[type=text], input[type=password] { width: 100%; padding: 10px 12px; font: inherit; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
+  input[type=file] { font: inherit; color: var(--ink); }
+  input:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .check { display: flex; align-items: center; gap: 8px; margin-top: 14px; color: var(--ink); font-size: 14px; cursor: pointer; }
+  .private-box { margin-top: 10px; padding: 12px 14px; border: 1px solid var(--line); border-left: 3px solid var(--primary); border-radius: 8px; background: var(--bg); }
+  .private-box ol { margin: 8px 0 0; padding-left: 20px; color: var(--muted); font-size: 13px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; border: 0; background: var(--primary); color: var(--primary-ink); font: inherit; font-weight: 600; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-top: 16px; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .msg { margin-top: 14px; padding: 10px 12px; border-radius: 8px; display: none; font-size: 14px; }
+  .msg.show { display: block; }
+  .msg.err { background: var(--bad-soft); color: var(--bad); }
+  .msg.info { background: var(--primary-soft); color: var(--primary); }
+  .stats { display: flex; gap: 28px; flex-wrap: wrap; margin: 12px 0 4px; }
+  .stats b { display: block; font-size: 22px; }
+  .stats span { color: var(--muted); font-size: 13px; }
+  .source { font-size: 14px; color: var(--muted); }
+  .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 6px; background: var(--primary-soft); color: var(--primary); }
+  .badge.get { background: #e3f3ea; color: #1f7a46; } .badge.post { background: #e6eefc; color: #2457b5; }
+  .badge.put, .badge.patch { background: #fdf0e6; color: #b4531a; } .badge.delete { background: var(--bad-soft); color: var(--bad); }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  code, .mono { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 13px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 13px; padding: 2px 10px; border-radius: 99px; background: var(--primary-soft); color: var(--primary); }
+  .chip.plain { background: var(--bg); border: 1px solid var(--line); color: var(--ink); }
+  .bar { height: 8px; border-radius: 4px; background: var(--primary); min-width: 2px; }
+  details { margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+  summary { cursor: pointer; font-weight: 500; }
+  pre { background: var(--code-bg); color: var(--code-ink); padding: 10px 12px; border-radius: 8px; overflow: auto; max-height: 320px; font-size: 12.5px; margin: 10px 0 0; }
+  ul.plain { margin: 6px 0 0; padding-left: 20px; }
+  .note { font-size: 13px; color: var(--muted); }
+  .material-symbols-outlined { font-size: 20px; vertical-align: middle; }
+  .spin { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; display: none; }
+  .btn.busy .spin { display: inline-block; }
+  @media (prefers-reduced-motion: no-preference) { .spin { animation: spin .8s linear infinite; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <button class="back" id="backBtn" type="button"><span class="material-symbols-outlined">arrow_back</span>Back</button>
+    <div>
+      <h1>Code Spec</h1>
+      <p class="sub" id="projectLine">Connect a codebase and see what it does.</p>
+    </div>
+  </div>
+
+  <!-- ===================== SOURCE ===================== -->
+  <section class="card">
+    <h2>Connect your code</h2>
+    <p class="muted">SpecPilot reads the code without running it, and deletes the downloaded copy as soon as the analysis is built.</p>
+
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabGithub" aria-selected="true">GitHub link</button>
+      <button type="button" role="tab" id="tabZip" aria-selected="false">Upload ZIP</button>
+    </div>
+
+    <div id="panelGithub">
+      <label for="ghUrl">Repository link</label>
+      <input type="text" id="ghUrl" placeholder="https://github.com/owner/repo" autocomplete="off">
+      <p class="note" style="margin:6px 0 0">Add <code>/tree/branch-name</code> to the link to use a branch other than the default.</p>
+
+      <label class="check"><input type="checkbox" id="isPrivate"> This is a private repository</label>
+      <div class="private-box" id="privateBox" hidden>
+        <label for="ghToken" style="margin-top:0">GitHub access token</label>
+        <input type="password" id="ghToken" placeholder="github_pat_..." autocomplete="off" spellcheck="false">
+        <ol>
+          <li>On GitHub open Settings, Developer settings, Personal access tokens, Fine-grained tokens, then Generate new token.</li>
+          <li>Choose <b>Only select repositories</b> and pick just this one.</li>
+          <li>Under Repository permissions set <b>Contents</b> to <b>Read-only</b>. Set a short expiry, such as 7 days.</li>
+        </ol>
+        <p class="note" style="margin:8px 0 0">The token is used once to download the code. It is not saved and the field is cleared afterwards. You can delete the token on GitHub when you are done.</p>
+      </div>
+    </div>
+
+    <div id="panelZip" hidden>
+      <label for="zipFile">ZIP file (up to 50 MB)</label>
+      <input type="file" id="zipFile" accept=".zip">
+    </div>
+
+    <button class="btn" id="analyzeBtn" type="button"><span class="spin"></span><span id="analyzeLabel">Analyze code</span></button>
+    <div class="msg" id="msg" role="status"></div>
+  </section>
+
+  <!-- ===================== RESULTS ===================== -->
+  <div id="results"></div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // =====================================================
+  // CONFIG: change these to match your app
+  // =====================================================
+  
+var CONFIG = {
+  API_BASE: "http://127.0.0.1:8000",
+  LOGIN_PAGE: "../index.html",
+
+  getToken: function () {
+    return localStorage.getItem("access_token") || "";
+  },
+
+  getProjectId: function () {
+    var params = new URLSearchParams(window.location.search);
+
+    return (
+      params.get("project_id") ||
+      params.get("id") ||
+      localStorage.getItem("selected_project_id") ||
+      ""
+    );
+  }
+};
+
+
+  var $ = function (id) { return document.getElementById(id); };
+  var mode = "github";
+
+  // ---------- small DOM helpers (all text goes through textContent) ----------
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function card(title, sub) {
+    var c = el("section", "card");
+    c.appendChild(el("h2", null, title));
+    if (sub) c.appendChild(el("p", "muted", sub));
+    return c;
+  }
+  function table(headers, rows, numericFrom) {
+    var wrap = el("div", "scroll"), t = el("table"), thead = el("thead"), hr = el("tr");
+    headers.forEach(function (h, i) {
+      hr.appendChild(el("th", numericFrom != null && i >= numericFrom ? "num" : null, h));
+    });
+    thead.appendChild(hr); t.appendChild(thead);
+    var tb = el("tbody");
+    rows.forEach(function (r) {
+      var tr = el("tr");
+      r.forEach(function (cell, i) {
+        var td = el("td", numericFrom != null && i >= numericFrom ? "num" : null);
+        if (cell && cell.nodeType) td.appendChild(cell); else td.textContent = cell == null ? "" : String(cell);
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); wrap.appendChild(t);
+    return wrap;
+  }
+  function chips(items, plain) {
+    var d = el("div", "chips");
+    items.forEach(function (x) { d.appendChild(el("span", "chip" + (plain ? " plain" : ""), x)); });
+    return d;
+  }
+  function mono(text) { return el("code", null, text); }
+  function empty(text) { return el("p", "note", text); }
+
+  function status(text, kind) {
+    var m = $("msg");
+    if (!text) { m.className = "msg"; m.textContent = ""; return; }
+    m.textContent = text;
+    m.className = "msg show " + (kind || "info");
+  }
+
+  // ---------- header + tabs ----------
+  var pid = CONFIG.getProjectId();
+  $("projectLine").textContent = pid ? "Project #" + pid + ": connect a codebase and see what it does." : "Open this page with ?project_id=...";
+  $("backBtn").onclick = function () { history.length > 1 ? history.back() : (location.href = "agent.html?project_id=" + encodeURIComponent(pid)); };
+
+  function setMode(m) {
+    mode = m;
+    $("tabGithub").setAttribute("aria-selected", m === "github");
+    $("tabZip").setAttribute("aria-selected", m === "zip");
+    $("panelGithub").hidden = m !== "github";
+    $("panelZip").hidden = m !== "zip";
+    status("");
+  }
+  $("tabGithub").onclick = function () { setMode("github"); };
+  $("tabZip").onclick = function () { setMode("zip"); };
+  $("isPrivate").onchange = function () { $("privateBox").hidden = !$("isPrivate").checked; if (!$("isPrivate").checked) $("ghToken").value = ""; };
+
+  // ---------- rendering ----------
+  function renderResults(data) {
+    var root = $("results");
+    root.innerHTML = "";
+    var facts = data.facts || {};
+
+    // Summary
+    var src = data.source || {};
+    var sum = card("Overview");
+    var srcText = src.type === "github"
+      ? "GitHub: " + src.owner + "/" + src.repo + " (" + src.ref + ")" + (src.private ? ", private" : "")
+      : "ZIP: " + (src.filename || "upload");
+    sum.appendChild(el("p", "source", srcText));
+    var stats = el("div", "stats");
+    [["Files", data.file_count], ["Lines of code", data.total_lines], ["Size", Math.round(data.total_bytes / 1024) + " KB"],
+     ["API routes", (facts.routes || []).length], ["Tables", (facts.models || []).length], ["Tests", (facts.tests || []).length]]
+      .forEach(function (s) {
+        var d = el("div"); d.appendChild(el("b", null, String(s[1]))); d.appendChild(el("span", null, s[0])); stats.appendChild(d);
+      });
+    sum.appendChild(stats);
+    root.appendChild(sum);
+
+    // Languages
+    var langs = data.languages || [];
+    var lc = card("Languages");
+    var maxLines = Math.max.apply(null, langs.map(function (l) { return l.lines; }).concat([1]));
+    lc.appendChild(table(["Language", "Files", "Lines", ""],
+      langs.map(function (l) {
+        var b = el("div", "bar"); b.style.width = Math.max(2, Math.round(100 * l.lines / maxLines)) + "%";
+        var cell = el("div"); cell.style.minWidth = "120px"; cell.appendChild(b);
+        return [l.language, l.files, l.lines, cell];
+      }), 1));
+    root.appendChild(lc);
+
+    // Technology stack
+    var sc = card("Technology stack", "Read from requirements.txt, pyproject.toml and package.json.");
+    if ((facts.frameworks || []).length) sc.appendChild(chips(facts.frameworks));
+    else sc.appendChild(empty("No known frameworks detected."));
+    (facts.dependencies || []).forEach(function (d) {
+      var det = el("details"), s = el("summary", null, d.file + " (" + d.packages.length + " packages)");
+      det.appendChild(s);
+      var items = d.packages.map(function (p) { return p.name + (p.spec ? " " + p.spec : "") + (p.dev ? " (dev)" : ""); });
+      det.appendChild(chips(items, true)); det.lastChild.style.marginTop = "10px";
+      sc.appendChild(det);
+    });
+    root.appendChild(sc);
+
+    // API
+    var routes = facts.routes || [];
+    var ac = card("API endpoints", "Found in the code with the file and line where each is defined.");
+    if (routes.length) {
+      ac.appendChild(table(["Method", "Path", "Function", "Location", "Auth"], routes.map(function (r) {
+        return [el("span", "badge " + r.method.toLowerCase(), r.method), mono(r.path), mono(r.function),
+                mono(r.file + ":" + r.line), r.requires_auth ? "Yes" : "No"];
+      })));
+    } else ac.appendChild(empty("No routes detected. Route detection supports Python (FastAPI and Flask) for now."));
+    root.appendChild(ac);
+
+    // Database
+    var models = facts.models || [];
+    var dc = card("Database design", "Tables, columns and relationships read from the model classes.");
+    if (models.length) {
+      models.forEach(function (m) {
+        var det = el("details");
+        det.appendChild(el("summary", null, m.table + " (" + m.class + ", " + m.columns.length + " columns) " + m.file + ":" + m.line));
+        det.appendChild(table(["Column", "Type", "Key", "Nullable", "Notes"], m.columns.map(function (c) {
+          var key = c.primary_key ? "PK" : (c.foreign_key ? "FK" : "");
+          var notes = [c.foreign_key ? "-> " + c.foreign_key : "", c.unique ? "unique" : ""].filter(Boolean).join(", ");
+          return [mono(c.name), mono(c.type || ""), key, c.nullable === false ? "No" : (c.nullable === true ? "Yes" : ""), notes];
+        })));
+        if (m.relationships.length) {
+          det.appendChild(el("p", "note", "Relationships: " + m.relationships.map(function (r) { return r.name + " -> " + (r.target || "?"); }).join(", ")));
+        }
+        dc.appendChild(det);
+      });
+    } else dc.appendChild(empty("No SQLAlchemy models detected."));
+    root.appendChild(dc);
+
+    // Tests
+    var tests = facts.tests || [];
+    var tc = card("Testing");
+    if (tests.length) {
+      tc.appendChild(el("p", "muted", tests.length + " test functions in " + (data.test_files || []).length + " files."));
+      var det = el("details"); det.appendChild(el("summary", null, "Show test functions"));
+      det.appendChild(table(["Test", "Location"], tests.map(function (t) { return [mono(t.name), mono(t.file + ":" + t.line)]; })));
+      tc.appendChild(det);
+    } else tc.appendChild(empty("No tests found."));
+    root.appendChild(tc);
+
+    // Env vars + key files
+    var ec = card("Configuration", "Environment variable names only. Values are never read.");
+    if ((facts.env_vars || []).length) ec.appendChild(chips(facts.env_vars, true)); else ec.appendChild(empty("No environment variables detected."));
+    if ((data.key_files || []).length) {
+      ec.appendChild(el("p", "note", "Key files:"));
+      ec.appendChild(chips(data.key_files, true));
+    }
+    root.appendChild(ec);
+
+    // Skipped + all files + notes
+    var fc = card("Details");
+    var sk = Object.keys(data.skipped || {});
+    fc.appendChild(el("p", "note", sk.length ? "Skipped: " + sk.map(function (k) { return k + " (" + data.skipped[k] + ")"; }).join(", ") : "Nothing was skipped."));
+    if ((facts.parse_errors || []).length) fc.appendChild(el("p", "note", "Could not parse: " + facts.parse_errors.join(", ")));
+    var fd = el("details"); fd.appendChild(el("summary", null, "All analysed files (" + data.file_count + ")"));
+    fd.appendChild(el("pre", null, (data.files || []).map(function (f) { return f.path + "  (" + f.language + ", " + f.lines + " lines)"; }).join("\n")));
+    fc.appendChild(fd);
+    var nd = el("details"); nd.appendChild(el("summary", null, "How to read this"));
+    var ul = el("ul", "plain note"); (facts.notes || []).forEach(function (n) { ul.appendChild(el("li", null, n)); });
+    nd.appendChild(ul); fc.appendChild(nd);
+    root.appendChild(fc);
+
+    root.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // ---------- request ----------
+  function setBusy(on) {
+    $("analyzeBtn").disabled = on;
+    $("analyzeBtn").classList.toggle("busy", on);
+    $("analyzeLabel").textContent = on ? "Analyzing..." : "Analyze code";
+  }
+
+  async function analyze() {
+    var token = CONFIG.getToken(), project = CONFIG.getProjectId();
+    if (!token) { status("You are not logged in. Please log in first.", "err"); return; }
+    if (!project) { status("No project selected. Open this page from a project.", "err"); return; }
+
+    var path, init;
+    if (mode === "github") {
+      var url = $("ghUrl").value.trim();
+      if (!url) { status("Paste a GitHub link first.", "err"); return; }
+      var body = { url: url };
+      if ($("isPrivate").checked) {
+        var t = $("ghToken").value.trim();
+        if (!t) { status("Add your access token for the private repository.", "err"); return; }
+        body.token = t;
+      }
+      path = "/codebase/github/" + encodeURIComponent(project);
+      init = { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+    } else {
+      var f = $("zipFile").files[0];
+      if (!f) { status("Choose a ZIP file first.", "err"); return; }
+      var fd = new FormData(); fd.append("file", f, f.name);
+      path = "/codebase/upload/" + encodeURIComponent(project);
+      init = { method: "POST", body: fd };
+    }
+    init.headers = Object.assign({ Authorization: "Bearer " + token }, init.headers || {});
+
+    setBusy(true);
+    status(mode === "github" ? "Downloading the repository and reading the code..." : "Uploading and reading the code...", "info");
+    $("results").innerHTML = "";
+    try {
+      var res = await fetch(CONFIG.API_BASE.replace(/\/+$/, "") + path, init);
+      var data = null; try { data = await res.json(); } catch (e) {}
+      if (res.status === 401) { status("Your session has expired. Please log in again.", "err"); return; }
+      if (!res.ok) {
+        var d = data && data.detail;
+        status(d ? (typeof d === "string" ? d : JSON.stringify(d)) : "Request failed (" + res.status + ").", "err");
+        return;
+      }
+      status("");
+      renderResults(data);
+    } catch (e) {
+      status("Cannot reach the server. Check that the backend is running and that this page's address is allowed by CORS.", "err");
+    } finally {
+      $("ghToken").value = "";           // never keep the token around
+      setBusy(false);
+    }
+  }
+
+  $("analyzeBtn").onclick = analyze;
+  $("ghUrl").addEventListener("keydown", function (e) { if (e.key === "Enter") analyze(); });
+})();
+</script>
+</body>
+</html>

@@ -347,6 +347,71 @@ async function loadProjects() {
 
 }
 
+
+async function renameProject(projectId, currentName) {
+    const newName = prompt(
+        "Enter the new project name:",
+        currentName
+    );
+
+    if (newName === null) return;
+
+    const trimmedName = newName.trim();
+
+    if (!trimmedName) {
+        alert("Project name cannot be empty.");
+        return;
+    }
+
+    if (trimmedName.length > 255) {
+        alert("Project name cannot exceed 255 characters.");
+        return;
+    }
+
+    if (trimmedName === currentName) return;
+
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        alert("Please log in again.");
+        window.location.href = "../index.html";
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API_URL}/projects/${projectId}/field`,
+            {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    field: "project_name",
+                    value: trimmedName
+                })
+            }
+        );
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(
+                error.detail || "Could not rename project."
+            );
+        }
+
+        // Refresh the cards using your existing loader.
+        await loadProjects();
+
+        alert("Project renamed successfully!");
+
+    } catch (error) {
+        console.error("Rename project error:", error);
+        alert(error.message || "Failed to rename project.");
+    }
+}
+
 // =========================================================
 // DELETE PROJECT
 // =========================================================
@@ -1511,6 +1576,17 @@ function createProjectCard(project) {
         </span>
         Delete
     </button>
+    <button
+    type="button"
+    class="rename-project-btn"
+    style="color: #635bff;"
+    title="Rename project"
+>
+    <span class="material-symbols-outlined">
+        edit
+    </span>
+    Rename
+</button>
 
 </div>
         `;
@@ -1667,6 +1743,18 @@ if (deleteButton) {
         }
     );
 
+}
+const renameButton = article.querySelector(
+    ".rename-project-btn"
+);
+
+if (renameButton) {
+    renameButton.addEventListener("click", async function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        await renameProject(projectId, projectName);
+    });
 }
     // =====================================================
     // CARD CLICK

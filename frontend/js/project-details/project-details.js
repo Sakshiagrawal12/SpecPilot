@@ -1402,3 +1402,20 @@ function showError(message) {
     if (errorState) errorState.classList.remove("hidden");
     if (errorMessage) errorMessage.textContent = message;
 }
+function openCodeSpec() {
+    const projectId = getProjectId();
+
+    if (!projectId) {
+        alert("Please open a project first.");
+        return;
+    }
+
+    localStorage.setItem(
+        "selected_project_id",
+        String(projectId)
+    );
+
+    window.location.href =
+        `code-spec.html?project_id=${encodeURIComponent(projectId)}`;
+}
+

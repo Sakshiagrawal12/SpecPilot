@@ -1,3 +1,4 @@
+import traceback
 from typing import Any, Dict
 
 from .state import SprintState
@@ -19,6 +20,23 @@ from .agents.sprint_review_agent import (
 )
 
 
+def _already_failed(state: SprintState) -> bool:
+    """An earlier node failed: keep its error instead of hiding it."""
+    return state.get("status") == "failed"
+
+
+def _need(state: SprintState, key: str, step: str) -> Any:
+    """Read a required input, or explain exactly what is missing."""
+    value = state.get(key)
+
+    if value is None:
+        raise ValueError(
+            f"'{key}' is missing. The step before {step} did not produce it."
+        )
+
+    return value
+
+
 def analyze_priority(
     state: SprintState,
 ) -> Dict[str, Any]:
@@ -37,6 +55,8 @@ def analyze_priority(
 
     except Exception as exc:
 
+        traceback.print_exc()
+
         return {
             "status": "failed",
             "error": f"Priority analysis failed: {exc}",
@@ -47,10 +67,13 @@ def analyze_capacity(
     state: SprintState,
 ) -> Dict[str, Any]:
 
+    if _already_failed(state):
+        return {}
+
     try:
 
         result = capacity_agent.plan_capacity(
-            tasks=state["prioritized_tasks"],
+            tasks=_need(state, "prioritized_tasks", "capacity planning"),
             project=state["project"],
         )
 
@@ -62,6 +85,8 @@ def analyze_capacity(
 
     except Exception as exc:
 
+        traceback.print_exc()
+
         return {
             "status": "failed",
             "error": f"Capacity planning failed: {exc}",
@@ -72,10 +97,13 @@ def analyze_dependencies(
     state: SprintState,
 ) -> Dict[str, Any]:
 
+    if _already_failed(state):
+        return {}
+
     try:
 
         result = dependency_agent.analyze(
-            tasks=state["prioritized_tasks"],
+            tasks=_need(state, "prioritized_tasks", "dependency analysis"),
         )
 
         return {
@@ -86,6 +114,8 @@ def analyze_dependencies(
 
     except Exception as exc:
 
+        traceback.print_exc()
+
         return {
             "status": "failed",
             "error": f"Dependency analysis failed: {exc}",
@@ -95,6 +125,9 @@ def analyze_dependencies(
 def build_sprint_plan(
     state: SprintState,
 ) -> Dict[str, Any]:
+
+    if _already_failed(state):
+        return {}
 
     capacity_plan = state.get(
         "capacity_plan",
@@ -140,13 +173,16 @@ def review_sprint_plan(
     state: SprintState,
 ) -> Dict[str, Any]:
 
+    if _already_failed(state):
+        return {}
+
     try:
 
         result = sprint_review_agent.review(
-            tasks=state["tasks"],
-            prioritized_tasks=state["prioritized_tasks"],
-            capacity_plan=state["capacity_plan"],
-            dependency_plan=state["dependency_plan"],
+            tasks=_need(state, "tasks", "the sprint review"),
+            prioritized_tasks=_need(state, "prioritized_tasks", "the sprint review"),
+            capacity_plan=_need(state, "capacity_plan", "the sprint review"),
+            dependency_plan=_need(state, "dependency_plan", "the sprint review"),
         )
 
         return {
@@ -157,6 +193,8 @@ def review_sprint_plan(
         }
 
     except Exception as exc:
+
+        traceback.print_exc()
 
         return {
             "status": "failed",

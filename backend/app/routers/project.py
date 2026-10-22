@@ -517,36 +517,43 @@ def update_project_field(
 
     # Only these fields can be edited from Project Details.
     allowed_fields = {
-        # Description
-        "overview",
-        "ai_problem_statement",
-        "proposed_solution",
-        "target_audience",
-        "business_value",
-        "major_features",
-        "expected_outcome",
+    "project_name",  # Allow renaming a project
 
-        # PRD
-        "product_overview",
-        "prd_problem_statement",
-        "goals_and_objectives",
-        "prd_target_users",
-        "functional_requirements",
-        "user_workflows",
-        "business_rules",
-        "non_functional_requirements",
-        "assumptions_and_dependencies",
-        "acceptance_criteria",
+    # Keep all your existing fields below
+    "overview",
+    "ai_problem_statement",
+    "proposed_solution",
+    "target_audience",
+    "business_value",
+    "major_features",
+    "expected_outcome",
 
-        # Sprint Plan
-        "sprint_plan"
+    "product_overview",
+    "prd_problem_statement",
+    "goals_and_objectives",
+    "prd_target_users",
+    "functional_requirements",
+    "user_workflows",
+    "business_rules",
+    "non_functional_requirements",
+    "assumptions_and_dependencies",
+    "acceptance_criteria",
+    "sprint_plan"
     }
+    if data.field == "project_name":
+        data.value = data.value.strip()
 
-    if data.field not in allowed_fields:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Field '{data.field}' cannot be edited."
-        )
+        if not data.value:
+            raise HTTPException(
+                status_code=400,
+                detail="Project name cannot be empty."
+            )
+
+        if len(data.value) > 255:
+            raise HTTPException(
+                status_code=400,
+                detail="Project name cannot exceed 255 characters."
+            )
 
     setattr(
         project,

@@ -1,18 +1,20 @@
-
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from app.ai.llm import llm
+
+MAX_ROUNDS = 4
 
 
 class TaskGenerationAgent:
     """Generates implementation tasks from the approved PRD."""
 
-    def _extract_json(self, response: str) -> Dict[str, Any]:
-        response = response.strip()
+    @staticmethod
+    def _strip_fences(text: str) -> str:
+        text = text.strip()
 
-        if response.startswith("```"):
-            lines = response.splitlines()
+        if text.startswith("```"):
+            lines = text.splitlines()
 
             if lines and lines[0].startswith("```"):
                 lines = lines[1:]
@@ -20,56 +22,73 @@ class TaskGenerationAgent:
             if lines and lines[-1].strip() == "```":
                 lines = lines[:-1]
 
-            response = "\n".join(lines).strip()
+            text = "\n".join(lines).strip()
 
-        try:
-            result = json.loads(response)
-        except json.JSONDecodeError as original_error:
-            start = response.find("{")
-            end = response.rfind("}")
+        return text
 
-            if start == -1 or end == -1 or start >= end:
-                raise ValueError(
-                    "Task Generation Agent returned no JSON object. "
-                    f"Response preview: {response[:1000]}"
-                ) from original_error
+    @staticmethod
+    def _salvage_tasks(text: str) -> List[Dict[str, Any]]:
+        """Collect every COMPLETE task object from a cut-off or malformed reply."""
 
-            candidate = response[start:end + 1]
+        key = text.find('"tasks"')
+        if key == -1:
+            return []
+
+        start = text.find("[", key)
+        if start == -1:
+            return []
+
+        decoder = json.JSONDecoder()
+        tasks: List[Dict[str, Any]] = []
+        i, n = start + 1, len(text)
+
+        while i < n:
+            while i < n and text[i] in " \n\r\t,":
+                i += 1
+
+            if i >= n or text[i] != "{":
+                break
 
             try:
+                obj, end = decoder.raw_decode(text, i)
+            except json.JSONDecodeError:
+                break  # last object was incomplete
+
+            tasks.append(obj)
+            i = end
+
+        return tasks
+
+    def _parse_tasks(self, response: str) -> Tuple[List[Dict[str, Any]], bool]:
+        """Returns (tasks, complete). complete=False means the reply was cut off or broken."""
+
+        text = self._strip_fences(response)
+
+        candidates = [text]
+        start, end = text.find("{"), text.rfind("}")
+        if start != -1 and end > start:
+            candidates.append(text[start:end + 1])
+
+        for candidate in candidates:
+            try:
                 result = json.loads(candidate)
-            except json.JSONDecodeError as exc:
-                error_position = exc.pos
-                snippet_start = max(0, error_position - 150)
-                snippet_end = min(len(candidate), error_position + 150)
+            except json.JSONDecodeError:
+                continue
 
-                raise ValueError(
-                    "Task Generation Agent returned invalid JSON. "
-                    f"Line {exc.lineno}, column {exc.colno}: {exc.msg}\n"
-                    f"Problematic response snippet:\n"
-                    f"{candidate[snippet_start:snippet_end]}"
-                ) from exc
+            if isinstance(result, dict) and isinstance(result.get("tasks"), list):
+                return result["tasks"], True
 
-        if not isinstance(result, dict):
-            raise ValueError(
-                "Task Generation Agent response must be a JSON object."
-            )
+            raise ValueError("Task Generation Agent did not return a task list.")
 
-        return result
+        return self._salvage_tasks(text), False
 
-    def generate(
+    def _build_prompt(
         self,
-        project: Any,
+        project_name: str,
         prd: Dict[str, Any],
         task_analysis: Dict[str, Any],
-    ) -> List[Dict[str, Any]]:
-        project_name = getattr(
-            project,
-            "project_name",
-            "Unnamed Project",
-        )
-
-        prompt = f"""
+    ) -> str:
+        return f"""
 You are a Task Generation Agent.
 
 Generate implementation tasks for the following project.
@@ -103,6 +122,9 @@ Each task must contain:
 Priority must be High, Medium, or Low.
 Estimated complexity must be Small, Medium, or Large.
 
+Keep every task compact: description at most 2 sentences,
+acceptance_criteria at most 3 short criteria in a single string.
+
 Return ONLY valid JSON in this structure:
 {{
     "tasks": [
@@ -122,14 +144,63 @@ Return ONLY valid JSON in this structure:
 }}
 """
 
-        response = llm.generate(prompt)
-        result = self._extract_json(response)
-        tasks = result.get("tasks")
+    def generate(
+        self,
+        project: Any,
+        prd: Dict[str, Any],
+        task_analysis: Dict[str, Any],
+    ) -> List[Dict[str, Any]]:
+        project_name = getattr(project, "project_name", "Unnamed Project")
+        base_prompt = self._build_prompt(project_name, prd, task_analysis)
 
-        if not isinstance(tasks, list):
-            raise ValueError(
-                "Task Generation Agent did not return a task list."
+        tasks: List[Dict[str, Any]] = []
+        seen = set()
+        prompt = base_prompt
+        last_response = ""
+        finished = False
+
+        for round_no in range(1, MAX_ROUNDS + 1):
+            last_response = llm.generate(prompt)
+            batch, complete = self._parse_tasks(last_response)
+
+            added = 0
+            for task in batch:
+                title = str(task.get("task_title", "")).strip().lower()
+                if title and title not in seen:
+                    seen.add(title)
+                    tasks.append(task)
+                    added += 1
+
+            print(
+                f"TASK GEN round {round_no}: complete={complete}, "
+                f"new tasks={added}, total={len(tasks)}"
             )
+
+            if complete:
+                finished = True
+                break
+
+            if added == 0:
+                break  # no progress, stop instead of looping
+
+            done_titles = "\n".join(f"- {t.get('task_title', '')}" for t in tasks)
+            prompt = (
+                base_prompt
+                + "\nTASKS ALREADY GENERATED (do not repeat them):\n"
+                + done_titles
+                + "\n\nGenerate ONLY the remaining tasks needed to cover the PRD, "
+                "in the same JSON structure. If every PRD requirement is already "
+                'covered, return {"tasks": []}.\n'
+            )
+
+        if not tasks:
+            raise ValueError(
+                "Task Generation Agent returned no usable tasks. "
+                f"Response preview: {last_response[:1000]}"
+            )
+
+        if not finished:
+            print("TASK GEN WARNING: stopped before the model confirmed completion")
 
         return tasks
 

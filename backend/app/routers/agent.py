@@ -1302,6 +1302,82 @@ def update_project_requirement(
     db.commit()
 
     return {"status": "success", "requirements": requirements}
+
+
+def apply_text_to_requirements(
+    *, project, conversation, document_text: str,
+    user_note: str, thread_id: str, db: Session
+) -> dict:
+    # user message in chat history
+    db.add(Message(conversation_id=conversation.id, role="user", content=user_note))
+    db.commit()
+
+    requirement_record, requirements = get_or_create_requirements(project.id, db)
+
+    try:
+        doc_result = extract_requirements_from_document(
+            document_text=document_text,
+            existing_requirements=requirements,
+        )
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, f"Failed to process text: {str(e)}")
+
+    updated_requirements = doc_result["requirements"]
+    filled_fields = doc_result["filled_fields"]
+
+    try:
+        next_turn = run_orchestrator_turn(
+            thread_id=thread_id,
+            project_id=project.id,
+            project_name=project.project_name,
+            user_message="",
+            requirements=updated_requirements,
+        )
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, f"Failed to continue interview: {str(e)}")
+
+    updated_requirements = next_turn.get("requirements", updated_requirements)
+    completeness_status = next_turn.get("completeness_status", "INCOMPLETE")
+    completeness_score = next_turn.get("completeness_score", 0)
+
+    if filled_fields:
+        readable = ", ".join(f.replace("_", " ") for f in filled_fields)
+        summary = f"I found information for: {readable}."
+    else:
+        summary = "I couldn't confidently extract any project details."
+
+    agent_response = f"{summary}\n\n{next_turn.get('agent_response', '')}".strip()
+
+    db.add(Message(conversation_id=conversation.id, role="agent", content=agent_response))
+
+    requirement_record.requirements = updated_requirements
+    requirement_record.completeness_status = completeness_status
+    requirement_record.completeness_score = completeness_score
+
+    if completeness_status.upper() == "COMPLETE":
+        conversation.status = "completed"
+        sync_requirements_to_project(project, updated_requirements)
+        db.add(project)
+
+    db.commit()
+
+    return {
+        "status": "completed",
+        "message": agent_response,
+        "response": agent_response,
+        "filled_fields": filled_fields,
+        "requirements": updated_requirements,
+        "completeness_status": completeness_status,
+        "completeness_score": completeness_score,
+        "missing_fields": next_turn.get("missing_fields", []),
+        "next_action": next_turn.get("next_action", ""),
+        "current_field": next_turn.get("current_field"),
+        "thread_id": thread_id,
+        "project_id": project.id,
+    }
+
 # =========================================================
 # UPLOAD DOCUMENT
 # =========================================================
@@ -1328,22 +1404,26 @@ async def upload_document(
     # -----------------------------------------------------
  
     file_bytes = await file.read()
- 
+
     try:
- 
         document_text = extract_text_from_file(file.filename, file_bytes)
- 
     except ValueError as e:
- 
         raise HTTPException(status_code=400, detail=str(e))
- 
+
     if not document_text.strip():
- 
         raise HTTPException(
             status_code=400,
             detail="No readable text found in the uploaded document."
         )
- 
+
+    return apply_text_to_requirements(
+        project=project,
+        conversation=conversation,
+        document_text=document_text,
+        user_note=f"[Uploaded document: {file.filename}]",
+        thread_id=thread_id,
+        db=db,
+    )
     # -----------------------------------------------------
     # SAVE USER MESSAGE (attachment note)
     # -----------------------------------------------------

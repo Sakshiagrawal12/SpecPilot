@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SpecPilot code upload test</title>
+<style>
+  :root { --paper:#eef1f4; --panel:#fff; --ink:#1c2530; --muted:#5d6b7a; --line:#cfd7df; --accent:#4338ca; --bad:#b3261e; --good:#1f7a46; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:15px/1.55 "Segoe UI",system-ui,sans-serif; }
+  main { max-width:820px; margin:0 auto; padding:28px 18px 80px; }
+  h1 { font-size:22px; margin:0 0 4px; } .sub { color:var(--muted); margin:0 0 22px; }
+  section { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:18px 20px; margin-bottom:14px; }
+  h2 { font-size:16px; margin:0 0 12px; }
+  label { display:block; font-size:13px; color:var(--muted); margin:10px 0 4px; }
+  input[type=text] { width:100%; padding:8px 10px; font:inherit; border:1px solid var(--line); border-radius:4px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  button { font:inherit; padding:8px 14px; border-radius:4px; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:#fff; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .msg { margin-top:10px; padding:8px 10px; border-radius:4px; display:none; }
+  .msg.show { display:block; } .msg.err { background:#fbe9e7; color:var(--bad); } .msg.info { background:#eceafb; color:var(--accent); }
+  table { border-collapse:collapse; width:100%; font-size:14px; } th,td { text-align:left; padding:5px 8px; border-bottom:1px solid var(--line); }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .stats { display:flex; gap:22px; flex-wrap:wrap; margin-bottom:14px; } .stats b { display:block; font-size:20px; }
+  .stats span { color:var(--muted); font-size:13px; }
+  ul { margin:6px 0; padding-left:20px; } code { font-size:13px; }
+  pre { background:#101820; color:#d6e2ee; padding:10px 12px; border-radius:4px; overflow:auto; max-height:320px; font-size:12.5px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Code upload test</h1>
+  <p class="sub">Step 1: upload a ZIP, check what SpecPilot would analyze and what it skips.</p>
+
+  <section>
+    <h2>Connect</h2>
+    <label for="base">Backend address</label>
+    <input type="text" id="base">
+    <label for="token">Access token (filled automatically if you logged in on the audio test page)</label>
+    <input type="text" id="token" placeholder="eyJ...">
+    <label for="pid">Project id</label>
+    <input type="text" id="pid" value="1" style="max-width:120px">
+  </section>
+
+  <section>
+    <h2>Upload a ZIP</h2>
+    <div class="row">
+      <input type="file" id="file" accept=".zip">
+      <button id="go" disabled>Analyze</button>
+    </div>
+    <div class="msg" id="msg"></div>
+  </section>
+
+  <section>
+    <h2>Or paste a public GitHub link</h2>
+    <div class="row">
+      <input type="text" id="ghUrl" class="grow" placeholder="https://github.com/owner/repo" style="flex:1 1 320px">
+      <button id="ghGo">Analyze link</button>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin:8px 0 0">Public repositories only. Add /tree/branch-name to the link to use a branch other than the default.</p>
+  </section>
+
+  <section id="out" style="display:none">
+    <h2>Inventory</h2>
+    <div class="stats" id="stats"></div>
+    <h2>Languages</h2><table id="langs"></table>
+    <h2 style="margin-top:16px">Key files found</h2><ul id="keys"></ul>
+    <h2 style="margin-top:16px">Skipped</h2><ul id="skipped"></ul>
+    <details style="margin-top:12px"><summary>All kept files</summary><pre id="files"></pre></details>
+  </section>
+</main>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  $("base").value = location.protocol.indexOf("http") === 0 ? location.origin : "http://localhost:8000";
+  try { $("token").value = sessionStorage.getItem("sp_token") || localStorage.getItem("access_token") || ""; } catch (e) {}
+
+  function show(text, kind) { var m = $("msg"); m.textContent = text; m.className = "msg show " + kind; }
+  $("file").onchange = function () { $("go").disabled = !$("file").files[0]; };
+
+  function row(cells, head) {
+    var tr = document.createElement("tr");
+    cells.forEach(function (c, i) {
+      var td = document.createElement(head ? "th" : "td");
+      td.textContent = c; if (i > 0) td.className = "num"; tr.appendChild(td);
+    });
+    return tr;
+  }
+  function list(el, items, empty) {
+    el.innerHTML = "";
+    if (!items.length) { var li = document.createElement("li"); li.textContent = empty; el.appendChild(li); return; }
+    items.forEach(function (t) { var li = document.createElement("li"); li.textContent = t; el.appendChild(li); });
+  }
+
+  function render(data) {
+    $("msg").className = "msg";
+    $("out").style.display = "block";
+    $("stats").innerHTML = "";
+    [["Files", data.file_count], ["Lines", data.total_lines], ["Size", Math.round(data.total_bytes / 1024) + " KB"],
+     ["Tests", data.test_files.length]].forEach(function (s) {
+      var d = document.createElement("div"); var b = document.createElement("b"); b.textContent = s[1];
+      var sp = document.createElement("span"); sp.textContent = s[0]; d.appendChild(b); d.appendChild(sp); $("stats").appendChild(d);
+    });
+    var t = $("langs"); t.innerHTML = ""; t.appendChild(row(["Language", "Files", "Lines"], true));
+    data.languages.forEach(function (l) { t.appendChild(row([l.language, l.files, l.lines])); });
+    list($("keys"), data.key_files, "none");
+    list($("skipped"), Object.keys(data.skipped).map(function (k) { return k + ": " + data.skipped[k]; }), "nothing skipped");
+    $("files").textContent = data.files.map(function (x) { return x.path + "  (" + x.language + ", " + x.lines + " lines)"; }).join("\n");
+  }
+
+  async function send(path, init, buttons, working) {
+    var token = $("token").value.trim().replace(/^Bearer\s+/i, "");
+    if (!token) { show("Paste an access token first.", "err"); return; }
+    init.headers = Object.assign({ Authorization: "Bearer " + token }, init.headers || {});
+    buttons.forEach(function (b) { b.disabled = true; });
+    show(working, "info");
+    try {
+      var res = await fetch($("base").value.replace(/\/+$/, "") + path + encodeURIComponent($("pid").value.trim()), init);
+      var data = null; try { data = await res.json(); } catch (e) {}
+      if (!res.ok) { show((data && data.detail) ? (typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail)) : "Request failed (" + res.status + ")", "err"); return; }
+      render(data);
+    } catch (e) {
+      show("Cannot reach the backend. Is the server running and is this origin allowed by CORS?", "err");
+    } finally {
+      buttons.forEach(function (b) { b.disabled = false; });
+      $("go").disabled = !$("file").files[0];
+    }
+  }
+
+  $("go").onclick = function () {
+    var f = $("file").files[0]; if (!f) return;
+    var fd = new FormData(); fd.append("file", f, f.name);
+    send("/codebase/upload/", { method: "POST", body: fd }, [$("go"), $("ghGo")], "Uploading and analyzing...");
+  };
+
+  $("ghGo").onclick = function () {
+    var url = $("ghUrl").value.trim();
+    if (!url) { show("Paste a GitHub link first.", "err"); return; }
+    send("/codebase/github/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: url }) },
+      [$("go"), $("ghGo")], "Fetching the repository from GitHub...");
+  };
+})();
+</script>
+</body>
+</html>

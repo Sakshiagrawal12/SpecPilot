@@ -407,3 +407,23 @@ class AgentChatRequest(BaseModel):
     message: str = ""
     thread_id: str
     initialize: bool = False
+
+class TranscriptOut(BaseModel):
+    id: int
+    status: str
+    raw_text: Optional[str] = None
+    edited_text: Optional[str] = None
+    error_message: Optional[str] = None
+
+class TranscriptUpdate(BaseModel):
+    edited_text: str
+    approve: bool = False
+
+class AudioSubmitOut(BaseModel):
+    agent_response: str
+    requirements: Dict[str, Any]
+    requirements_status: Optional[str] = None
+    requirements_score: Optional[float] = None
+    current_field: Optional[str] = None
+    missing_fields: List[str] = []
+    workflow_status: Optional[str] = None

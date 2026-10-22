@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SpecPilot audio test</title>
+<style>
+  :root {
+    --paper: #eef1f4;
+    --panel: #ffffff;
+    --ink: #1c2530;
+    --muted: #5d6b7a;
+    --line: #cfd7df;
+    --accent: #0f6b6b;
+    --accent-ink: #ffffff;
+    --warn: #b4531a;
+    --bad: #b3261e;
+    --good: #1f7a46;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 15px/1.55 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 28px 18px 80px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 22px; }
+  section {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  section.locked { opacity: .55; }
+  h2 { font-size: 16px; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+  h2 .n {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--ink); color: #fff; font-size: 13px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  h2 .n.done { background: var(--good); }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+  input[type=text], input[type=password], textarea {
+    width: 100%; padding: 8px 10px; font: inherit; color: inherit;
+    border: 1px solid var(--line); border-radius: 4px; background: #fff;
+  }
+  textarea { min-height: 170px; resize: vertical; }
+  textarea[readonly] { background: #f6f8fa; color: var(--muted); min-height: 110px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .row > .grow { flex: 1 1 200px; }
+  button {
+    font: inherit; padding: 8px 14px; border-radius: 4px; cursor: pointer;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  button.rec { background: var(--bad); border-color: var(--bad); color: #fff; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .pill {
+    display: inline-block; padding: 1px 9px; border-radius: 99px; font-size: 13px;
+    border: 1px solid var(--line); background: #f6f8fa;
+  }
+  .pill.ok { color: var(--good); border-color: var(--good); }
+  .pill.bad { color: var(--bad); border-color: var(--bad); }
+  .pill.wait { color: var(--warn); border-color: var(--warn); }
+  .timer { font-variant-numeric: tabular-nums; min-width: 48px; }
+  .msg { margin-top: 10px; padding: 8px 10px; border-radius: 4px; font-size: 14px; display: none; }
+  .msg.show { display: block; }
+  .msg.err { background: #fbe9e7; color: var(--bad); }
+  .msg.info { background: #e6f2f2; color: var(--accent); }
+  .agent {
+    white-space: pre-wrap; background: #f6f8fa; border-left: 3px solid var(--accent);
+    padding: 10px 12px; border-radius: 0 4px 4px 0; margin: 8px 0;
+  }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 2px; }
+  .tags span { font-size: 13px; padding: 1px 8px; border-radius: 3px; background: #e6f2f2; color: var(--accent); }
+  .tags span.miss { background: #fdf0e6; color: var(--warn); }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  pre {
+    background: #101820; color: #d6e2ee; padding: 10px 12px; border-radius: 4px;
+    overflow: auto; max-height: 260px; font-size: 12.5px; margin: 8px 0 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .dot { animation: pulse 1s infinite; }
+  }
+  .dot { display: none; width: 10px; height: 10px; border-radius: 50%; background: var(--bad); }
+  .dot.on { display: inline-block; }
+  @keyframes pulse { 50% { opacity: .25; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Audio to requirements: test page</h1>
+  <p class="sub">Checks the full flow: record or upload, transcribe, review, approve, submit.</p>
+
+  <!-- 1. Connect -->
+  <section id="s1">
+    <h2><span class="n" id="n1">1</span>Connect</h2>
+    <label for="base">Backend address</label>
+    <input type="text" id="base">
+    <div class="row">
+      <div class="grow">
+        <label for="email">Email</label>
+        <input type="text" id="email" autocomplete="username">
+      </div>
+      <div class="grow">
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="current-password">
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="loginBtn">Log in</button>
+      <span id="loginState" class="pill">Not logged in</span>
+    </div>
+    <label for="token">Or paste a token directly</label>
+    <div class="row">
+      <input type="text" id="token" class="grow" placeholder="eyJ...">
+      <button id="useToken">Use token</button>
+    </div>
+    <div class="msg" id="msg1"></div>
+    <label for="pid" style="margin-top:14px">Project id (must belong to this account)</label>
+    <input type="text" id="pid" value="1" style="max-width:120px">
+  </section>
+
+  <!-- 2. Record or upload -->
+  <section id="s2" class="locked">
+    <h2><span class="n" id="n2">2</span>Record or upload audio</h2>
+    <div class="row">
+      <button id="recBtn">Start recording</button>
+      <span class="dot" id="dot"></span>
+      <span class="timer" id="timer">0:00</span>
+      <span class="hint" style="margin:0">or</span>
+      <input type="file" id="file" accept=".mp3,.wav,.m4a,.webm,audio/*">
+    </div>
+    <audio id="player" controls style="width:100%;margin-top:12px;display:none"></audio>
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="transBtn" disabled>Transcribe</button>
+      <span id="transState" class="pill">No audio yet</span>
+    </div>
+    <div class="msg" id="msg2"></div>
+    <p class="hint">Recording needs microphone permission. Accepted files: mp3, wav, m4a, webm.</p>
+  </section>
+
+  <!-- 3. Review -->
+  <section id="s3" class="locked">
+    <h2><span class="n" id="n3">3</span>Review the transcript</h2>
+    <label for="raw">Original from speech-to-text</label>
+    <textarea id="raw" readonly></textarea>
+    <label for="edited">Cleaned text (edit anything that is wrong)</label>
+    <textarea id="edited"></textarea>
+    <div class="row" style="margin-top:12px">
+      <button id="saveBtn" disabled>Save edits</button>
+      <button class="primary" id="approveBtn" disabled>Approve</button>
+      <button id="resetBtn" disabled>Reset to original</button>
+      <span id="tStatus" class="pill">-</span>
+    </div>
+    <div class="msg" id="msg3"></div>
+  </section>
+
+  <!-- 4. Submit -->
+  <section id="s4" class="locked">
+    <h2><span class="n" id="n4">4</span>Submit to the requirement agent</h2>
+    <div class="row">
+      <button class="primary" id="submitBtn" disabled>Submit approved transcript</button>
+    </div>
+    <div class="msg" id="msg4"></div>
+    <div id="result" style="display:none">
+      <label>Agent reply</label>
+      <div class="agent" id="agentText"></div>
+      <label>Fields filled from your voice note</label>
+      <div class="tags" id="filled"></div>
+      <label>Still missing</label>
+      <div class="tags" id="missing"></div>
+      <label>Completeness</label>
+      <div id="complete"></div>
+    </div>
+  </section>
+
+  <details>
+    <summary>Request log</summary>
+    <pre id="log">Nothing sent yet.</pre>
+  </details>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var token = "";
+  var tid = null;
+  var audioBlob = null;
+  var audioName = "";
+  var recorder = null, chunks = [], stream = null, tick = null, startedAt = 0;
+  var rawOriginal = "";
+
+  // Default backend address: same origin when served over http, else localhost:8000
+  $("base").value = location.protocol.indexOf("http") === 0 ? location.origin : "http://localhost:8000";
+  try { var saved = sessionStorage.getItem("sp_token"); if (saved) setToken(saved, "Restored session token"); } catch (e) {}
+
+  function base() { return $("base").value.replace(/\/+$/, ""); }
+  function pid() { return encodeURIComponent($("pid").value.trim()); }
+
+  function show(id, text, kind) {
+    var el = $(id);
+    el.textContent = text;
+    el.className = "msg show " + (kind || "info");
+  }
+  function hide(id) { $(id).className = "msg"; }
+
+  function log(line) {
+    var el = $("log");
+    if (el.textContent === "Nothing sent yet.") el.textContent = "";
+    el.textContent = new Date().toLocaleTimeString() + "  " + line + "\n" + el.textContent;
+  }
+
+  function errText(data, status) {
+    if (data && data.detail) {
+      return typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
+    }
+    return "Request failed (" + status + ")";
+  }
+
+  function unlock(id, on) { $(id).className = on ? "" : "locked"; }
+  function done(id) { $(id).className = "n done"; $(id).textContent = "\u2713"; }
+
+  async function api(method, path, opts) {
+    opts = opts || {};
+    var headers = {};
+    if (token) headers["Authorization"] = "Bearer " + token;
+    var init = { method: method, headers: headers };
+    if (opts.json) { headers["Content-Type"] = "application/json"; init.body = JSON.stringify(opts.json); }
+    if (opts.form) { init.body = opts.form; }
+    var res, data = null;
+    try {
+      res = await fetch(base() + path, init);
+    } catch (e) {
+      log(method + " " + path + " -> network error");
+      throw new Error("Cannot reach the backend at " + base() + ". Is the server running, and is this origin allowed by CORS?");
+    }
+    try { data = await res.json(); } catch (e) {}
+    log(method + " " + path + " -> " + res.status);
+    if (!res.ok) {
+      var err = new Error(errText(data, res.status));
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  // ---------- 1. Connect ----------
+  function setToken(t, note) {
+    token = t;
+    try { sessionStorage.setItem("sp_token", t); } catch (e) {}
+    $("loginState").textContent = note || "Logged in";
+    $("loginState").className = "pill ok";
+    done("n1");
+    unlock("s2", true);
+    hide("msg1");
+  }
+
+  async function tryLogin(url, init) {
+    var res = await fetch(base() + url, init);
+    var data = null;
+    try { data = await res.json(); } catch (e) {}
+    log("POST " + url + " -> " + res.status);
+    return { ok: res.ok, status: res.status, data: data };
+  }
+
+  $("loginBtn").onclick = async function () {
+    var email = $("email").value.trim(), pw = $("password").value;
+    if (!email || !pw) { show("msg1", "Enter your email and password.", "err"); return; }
+    $("loginState").textContent = "Logging in...";
+    $("loginState").className = "pill wait";
+    var attempts = [
+      ["/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: email, password: pw }) }],
+      ["/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: email, password: pw }) }],
+      ["/auth/login", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ username: email, password: pw }).toString() }]
+    ];
+    var last = null;
+    try {
+      for (var i = 0; i < attempts.length; i++) {
+        var r = await tryLogin(attempts[i][0], attempts[i][1]);
+        last = r;
+        var t = r.data && (r.data.access_token || r.data.token);
+        if (r.ok && t) { setToken(t); return; }
+        if (r.status === 401) break; // credentials rejected, other formats will not help
+      }
+    } catch (e) {
+      $("loginState").textContent = "Not logged in";
+      $("loginState").className = "pill bad";
+      show("msg1", "Cannot reach the backend at " + base() + ". Check the address and CORS settings.", "err");
+      return;
+    }
+    $("loginState").textContent = "Not logged in";
+    $("loginState").className = "pill bad";
+    show("msg1", "Login failed: " + errText(last && last.data, last && last.status), "err");
+  };
+
+  $("useToken").onclick = function () {
+    var t = $("token").value.trim().replace(/^Bearer\s+/i, "");
+    if (!t) { show("msg1", "Paste a token first.", "err"); return; }
+    setToken(t, "Token set");
+  };
+
+  // ---------- 2. Record / upload ----------
+  function setAudio(blob, name) {
+    audioBlob = blob; audioName = name;
+    var p = $("player");
+    p.src = URL.createObjectURL(blob);
+    p.style.display = "block";
+    $("transBtn").disabled = false;
+    $("transState").textContent = "Ready: " + name + " (" + Math.round(blob.size / 1024) + " KB)";
+    $("transState").className = "pill";
+    hide("msg2");
+  }
+
+  function fmt(ms) {
+    var s = Math.floor(ms / 1000);
+    return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  }
+
+  $("recBtn").onclick = async function () {
+    if (recorder && recorder.state === "recording") { recorder.stop(); return; }
+    if (!navigator.mediaDevices || !window.MediaRecorder) {
+      show("msg2", "This browser cannot record audio. Upload a file instead.", "err"); return;
+    }
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      show("msg2", "Microphone access was blocked. Allow it in the address bar, or upload a file.", "err"); return;
+    }
+    chunks = [];
+    recorder = new MediaRecorder(stream);
+    recorder.ondataavailable = function (e) { if (e.data.size) chunks.push(e.data); };
+    recorder.onstop = function () {
+      clearInterval(tick);
+      stream.getTracks().forEach(function (t) { t.stop(); });
+      $("dot").className = "dot";
+      $("recBtn").textContent = "Record again";
+      $("recBtn").className = "";
+      var blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
+      setAudio(blob, "recording.webm");
+    };
+    recorder.start();
+    startedAt = Date.now();
+    $("timer").textContent = "0:00";
+    tick = setInterval(function () { $("timer").textContent = fmt(Date.now() - startedAt); }, 250);
+    $("dot").className = "dot on";
+    $("recBtn").textContent = "Stop recording";
+    $("recBtn").className = "rec";
+  };
+
+  $("file").onchange = function () {
+    var f = $("file").files[0];
+    if (f) setAudio(f, f.name);
+  };
+
+  $("transBtn").onclick = async function () {
+    if (!audioBlob) return;
+    $("transBtn").disabled = true;
+    $("transState").textContent = "Transcribing...";
+    $("transState").className = "pill wait";
+    hide("msg2");
+    var fd = new FormData();
+    fd.append("file", audioBlob, audioName);
+    try {
+      var t = await api("POST", "/audio/transcribe/" + pid(), { form: fd });
+      tid = t.id;
+      if (t.status === "failed") {
+        $("transState").textContent = "Failed";
+        $("transState").className = "pill bad";
+        show("msg2", t.error_message || "Transcription failed.", "err");
+        $("transBtn").disabled = false;
+        return;
+      }
+      rawOriginal = t.raw_text || "";
+      $("raw").value = rawOriginal;
+      $("edited").value = t.edited_text || "";
+      $("transState").textContent = "Transcribed (id " + t.id + ")";
+      $("transState").className = "pill ok";
+      done("n2");
+      setStatus(t.status);
+      unlock("s3", true);
+      ["saveBtn", "approveBtn", "resetBtn"].forEach(function (b) { $(b).disabled = false; });
+      $("transBtn").disabled = false;
+    } catch (e) {
+      $("transState").textContent = "Failed";
+      $("transState").className = "pill bad";
+      show("msg2", e.message + (e.status === 401 ? " Log in again in step 1." : ""), "err");
+      $("transBtn").disabled = false;
+    }
+  };
+
+  // ---------- 3. Review ----------
+  function setStatus(s) {
+    $("tStatus").textContent = s;
+    $("tStatus").className = "pill " + (s === "approved" || s === "submitted" ? "ok" : s === "failed" ? "bad" : "wait");
+  }
+
+  async function save(approve) {
+    var text = $("edited").value;
+    hide("msg3");
+    try {
+      var t = await api("PUT", "/audio/transcripts/" + pid() + "/" + tid, { json: { edited_text: text, approve: approve } });
+      setStatus(t.status);
+      if (approve) {
+        done("n3");
+        unlock("s4", true);
+        $("submitBtn").disabled = false;
+        show("msg3", "Approved. You can submit it in step 4.", "info");
+      } else {
+        $("submitBtn").disabled = true;
+        show("msg3", "Edits saved. Approve when the text is right.", "info");
+      }
+    } catch (e) {
+      show("msg3", e.message, "err");
+    }
+  }
+
+  $("saveBtn").onclick = function () { save(false); };
+  $("approveBtn").onclick = function () { save(true); };
+  $("resetBtn").onclick = function () { $("edited").value = rawOriginal; };
+  $("edited").oninput = function () {
+    // editing after approval puts the transcript back into review on the server, so lock submit until re-approved
+    $("submitBtn").disabled = true;
+  };
+
+  // ---------- 4. Submit ----------
+  function tags(el, items, cls) {
+    el.innerHTML = "";
+    if (!items || !items.length) {
+      var none = document.createElement("span");
+      none.textContent = "none";
+      none.className = cls || "";
+      el.appendChild(none);
+      return;
+    }
+    items.forEach(function (x) {
+      var s = document.createElement("span");
+      s.textContent = String(x).replace(/_/g, " ");
+      if (cls) s.className = cls;
+      el.appendChild(s);
+    });
+  }
+
+  $("submitBtn").onclick = async function () {
+    $("submitBtn").disabled = true;
+    hide("msg4");
+    show("msg4", "Submitting. The agent is reading your transcript...", "info");
+    try {
+      var r = await api("POST", "/audio/transcripts/" + pid() + "/" + tid + "/submit", {
+        json: { thread_id: "audio-test-" + Date.now() }
+      });
+      hide("msg4");
+      done("n4");
+      setStatus("submitted");
+      $("result").style.display = "block";
+      $("agentText").textContent = r.message || r.response || "(no reply)";
+      tags($("filled"), r.filled_fields);
+      tags($("missing"), r.missing_fields, "miss");
+      $("complete").textContent = (r.completeness_status || "?") + (r.completeness_score != null ? " (score " + r.completeness_score + ")" : "");
+      var d = document.createElement("details");
+      var s = document.createElement("summary");
+      s.textContent = "Full response";
+      var p = document.createElement("pre");
+      p.textContent = JSON.stringify(r, null, 2);
+      d.appendChild(s); d.appendChild(p);
+      var old = $("result").querySelector("details");
+      if (old) old.remove();
+      $("result").appendChild(d);
+    } catch (e) {
+      show("msg4", e.message, "err");
+      $("submitBtn").disabled = false;
+    }
+  };
+})();
+</script>
+</body>
+</html>

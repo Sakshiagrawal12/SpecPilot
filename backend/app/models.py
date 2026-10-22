@@ -262,7 +262,11 @@ class Project(Base):
         uselist=False,
         cascade="all, delete-orphan"
     )
-
+    transcripts = relationship(
+        "Transcript",
+        back_populates="project",
+        cascade="all, delete-orphan"
+    )
 
 # =========================================================
 # CONVERSATION
@@ -319,6 +323,7 @@ class Conversation(Base):
         cascade="all, delete-orphan",
         order_by="Message.created_at"
     )
+    
 
 
 # =========================================================
@@ -466,7 +471,10 @@ class Task(Base):
         primary_key=True,
         index=True
     )
-
+    task_number = Column(
+        Integer,
+        nullable=True
+    )
     # =====================================================
     # PROJECT
     # =====================================================
@@ -555,4 +563,46 @@ class Task(Base):
         back_populates="tasks"
     )
 
-    
+class Transcript(Base):
+
+    __tablename__ = "transcripts"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    project_id = Column(
+        Integer,
+        ForeignKey("projects.id"),
+        nullable=False,
+        index=True
+    )
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    audio_filename = Column(String(255))
+
+    raw_text = Column(Text)
+
+    edited_text = Column(Text)
+
+    # transcribing | needs_review | approved | submitted | failed
+    status = Column(String(50), default="transcribing", nullable=False)
+
+    error_message = Column(Text)
+
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False
+    )
+
+    project = relationship(
+        "Project",
+        back_populates="transcripts"
+    )

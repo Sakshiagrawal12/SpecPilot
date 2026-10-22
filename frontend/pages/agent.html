@@ -711,6 +711,28 @@
 
 <script type="module" src="../js/agent.js"></script>
 
+<script src="../js/audio.js"></script>
+<script>
+  window.addEventListener("load", function () {
+    SpecPilotMic.init({
+      apiBase: "http://127.0.0.1:8000",
+      inputSelector: "#messageInput",
+      sendButtonSelector: "#sendButton",
+
+      // CHANGE these three to whatever your chat code already uses
+      getToken:     () => localStorage.getItem("access_token"),
+      getProjectId: () => localStorage.getItem("project_id"),
+      getThreadId:  () => localStorage.getItem("thread_id") || "voice-" + Date.now(),
+
+      // CHANGE: use your own function that draws chat bubbles
+      onReply: function (result, userText) {
+        console.log("Voice reply:", result);
+        // e.g. appendMessage("user", userText);
+        //      appendMessage("assistant", result.agent_response);
+      }
+    });
+  });
+</script>
 </body>
 
 </html>

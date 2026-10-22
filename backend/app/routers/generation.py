@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Project, Task, ProjectRequirement
 from app.agents.generation_manager.runner import run_generation
-
+from app.services.prd_format import to_readable
 
 router = APIRouter(
     prefix="/generation",
@@ -29,18 +29,8 @@ router = APIRouter(
 # ============================================================
 
 def to_text(value) -> str:
-    """
-    Text columns can't store lists/dicts. Keep strings as-is and
-    JSON-encode everything else.
-    """
-
-    if value is None:
-        return ""
-
-    if isinstance(value, str):
-        return value
-
-    return json.dumps(value, ensure_ascii=False)
+    """Structured values are saved as readable plain text."""
+    return to_readable(value)
 
 
 def get_project_or_404(
