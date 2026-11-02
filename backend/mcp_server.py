@@ -1,20 +1,28 @@
-import hmac
 import json
+import logging
 import os
+from contextvars import ContextVar
 from typing import Optional
+from urllib.parse import urlsplit
 
 import httpx
 from mcp.server import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
+
 mcp = MCPServer("SpecPilot MCP Server")
+
+logger = logging.getLogger("specpilot.mcp")
 
 SPEC_PILOT_API = os.getenv("SPECPILOT_API", "http://127.0.0.1:8000")
 
-_cached_jwt_token: Optional[str] = None
+# Filled in for every request by OAuthMiddleware (bottom of this file).
+# Each request therefore acts as exactly one signed-in SpecPilot user.
+_current_user: ContextVar[Optional[dict]] = ContextVar("current_user", default=None)
+_api_token: ContextVar[Optional[str]] = ContextVar("api_token", default=None)
 
 
 # ============================================================
-# AUTH HELPERS (SpecPilot backend login, JWT cached in memory)
+# AUTH HELPERS (the signed-in user's own short-lived API token)
 # ============================================================
 
 class AuthConfigError(Exception):
@@ -25,72 +33,23 @@ class AuthLoginError(Exception):
     pass
 
 
-def clear_token_cache() -> None:
-    """Clear cached JWT token (useful for re-auth and testing)."""
-    global _cached_jwt_token
-    _cached_jwt_token = None
-
-
-async def _login_and_get_token(client: httpx.AsyncClient) -> str:
-    """Authenticate with SpecPilot backend and return JWT access token."""
-    global _cached_jwt_token
-    email = os.getenv("SPECPILOT_USER_EMAIL")
-    password = os.getenv("SPECPILOT_USER_PASSWORD")
-
-    if not email or not password:
-        raise AuthConfigError(
-            "SPECPILOT_USER_EMAIL or SPECPILOT_USER_PASSWORD environment variable not set"
-        )
-
-    login_resp = await client.post(
-        f"{SPEC_PILOT_API}/auth/login",
-        json={"email": email, "password": password},
-    )
-
-    if login_resp.status_code == 401:
-        raise AuthLoginError(
-            "SpecPilot login failed: check SPECPILOT_USER_EMAIL / SPECPILOT_USER_PASSWORD"
-        )
-
-    if login_resp.status_code >= 400:
-        raise AuthLoginError(
-            f"SpecPilot login failed with status {login_resp.status_code}"
-        )
-
-    try:
-        token = login_resp.json().get("access_token")
-    except ValueError:
-        raise AuthLoginError("SpecPilot login returned a non-JSON response")
-
-    if not token:
-        raise AuthLoginError("SpecPilot login response did not contain access_token")
-
-    _cached_jwt_token = token
-    return token
-
-
 async def authenticated_request(method: str, path: str, **kwargs) -> httpx.Response:
-    """Send an authenticated request to the SpecPilot backend with JWT caching and one 401 retry."""
-    global _cached_jwt_token
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        token = _cached_jwt_token
-        if not token:
-            token = await _login_and_get_token(client)
+    """Send a request to the SpecPilot backend as the signed-in user of this request."""
+    token = _api_token.get()
+    if not token:
+        raise AuthLoginError("Not signed in to SpecPilot")
 
-        headers = dict(kwargs.pop("headers", {}))
-        headers["Authorization"] = f"Bearer {token}"
+    timeout = kwargs.pop("timeout", 60.0)
+    headers = dict(kwargs.pop("headers", {}))
+    headers["Authorization"] = f"Bearer {token}"
 
-        url = f"{SPEC_PILOT_API}{path}"
-        response = await client.request(method, url, headers=headers, **kwargs)
-
-        if response.status_code == 401:
-            # Token may have expired - clear cache and log in once more
-            _cached_jwt_token = None
-            token = await _login_and_get_token(client)
-            headers["Authorization"] = f"Bearer {token}"
-            response = await client.request(method, url, headers=headers, **kwargs)
-
-        return response
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        return await client.request(
+            method,
+            f"{SPEC_PILOT_API}{path}",
+            headers=headers,
+            **kwargs,
+        )
 
 
 def _error_for_status(response: httpx.Response, project_id: Optional[int] = None) -> Optional[dict]:
@@ -200,7 +159,7 @@ def _is_empty(value) -> bool:
     if value is None:
         return True
     if isinstance(value, str):
-        return value.strip() in ("", "None","Not specified")
+        return value.strip() in ("", "None", "Not specified")
     if isinstance(value, (list, tuple)):
         return all(_is_empty(v) for v in value)
     if isinstance(value, dict):
@@ -358,15 +317,16 @@ def _sorted_tasks(tasks: list) -> list:
 
 
 def build_tasks_markdown(tasks: list) -> str:
-    lines = ["## Task Breakdown", ""] 
+    lines = ["## Task Breakdown", ""]
     for number, task in enumerate(_sorted_tasks(tasks), start=1):
+        label = task.get("task_number") or number
         meta = [
             task.get(key)
             for key in ("priority", "task_type", "module", "estimated_complexity", "status")
             if task.get(key)
         ]
         suffix = f"  _[{' | '.join(str(m) for m in meta)}]_" if meta else ""
-        lines.append(f"### Task {number}: {task.get('task_title')}{suffix}")
+        lines.append(f"### Task {label}: {task.get('task_title')}{suffix}")
         lines.append("")
         if not _is_empty(task.get("description")):
             lines.extend(_safe_render(task.get("description")))
@@ -386,11 +346,11 @@ def build_tasks_markdown(tasks: list) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def _clean_task(task: dict) -> dict:
+def _clean_task(task: dict, number: int) -> dict:
     """Task fields for tool output, with the dependencies text decoded."""
     dependencies = _parse(task.get("dependencies"))
     return {
-        "number":number,
+        "number": task.get("task_number") or number,
         "id": task.get("id"),
         "task_title": task.get("task_title"),
         "description": task.get("description"),
@@ -434,48 +394,65 @@ async def _fetch_tasks(project_id: int):
 # ============================================================
 
 @mcp.tool()
+async def whoami() -> dict:
+    """Show which SpecPilot account this connection is signed in as."""
+
+    user = _current_user.get()
+    if not user:
+        return {"success": False, "error": "Not signed in to SpecPilot"}
+
+    return {
+        "success": True,
+        "user_id": user.get("user_id"),
+        "name": user.get("name"),
+    }
+
+
+@mcp.tool()
 async def generate_project_spec(project_id: int) -> dict:
     """Run the existing SpecPilot project-generation pipeline."""
 
-    if project_id <= 0:
-        return {
-            "success": False,
-            "error": "project_id must be positive",
-        }
+    bad = _bad_id(project_id)
+    if bad:
+        return bad
 
     try:
-        async with httpx.AsyncClient(timeout=300.0) as client:
-            response = await client.post(
-                f"{SPEC_PILOT_API}/generation/run/{project_id}"
-            )
-            response.raise_for_status()
-            data = response.json()
+        # Ownership is verified first through GET /projects/{id}.
+        _, error = await _fetch_project(project_id)
+        if error:
+            return error
 
+        response = await authenticated_request(
+            "POST",
+            f"/generation/run/{project_id}",
+            timeout=300.0,
+        )
+
+        error = _error_for_status(response, project_id)
+        if error:
+            error["details"] = response.text[:2000]
+            return error
+
+        try:
+            data = response.json()
+        except ValueError:
             return {
-                "success": True,
+                "success": False,
                 "project_id": project_id,
-                "status": data.get("status"),
-                "tasks_created": data.get("tasks_created"),
-                "has_prd": bool(data.get("prd")),
-                "has_sprint_plan": bool(data.get("sprint_plan")),
+                "error": "Unexpected response from SpecPilot API",
             }
 
-    except httpx.HTTPStatusError as exc:
         return {
-            "success": False,
+            "success": True,
             "project_id": project_id,
-            "error": "SpecPilot API returned an error",
-            "status_code": exc.response.status_code,
-            "details": exc.response.text[:2000],
+            "status": data.get("status"),
+            "tasks_created": data.get("tasks_created"),
+            "has_prd": bool(data.get("prd")),
+            "has_sprint_plan": bool(data.get("sprint_plan")),
         }
 
-    except httpx.RequestError as exc:
-        return {
-            "success": False,
-            "project_id": project_id,
-            "error": "Could not connect to SpecPilot backend",
-            "details": str(exc),
-        }
+    except _HANDLED as exc:
+        return _auth_and_connection_error(exc, project_id)
 
 
 @mcp.tool()
@@ -626,7 +603,7 @@ async def get_project_tasks(project_id: int) -> dict:
             "success": True,
             "project_id": project_id,
             "count": len(tasks),
-            "tasks": [_clean_task(t) for n, t in enumerate(tasks, start=1)],
+            "tasks": [_clean_task(t, n) for n, t in enumerate(tasks, start=1)],
         }
 
     except _HANDLED as exc:
@@ -714,54 +691,152 @@ async def get_build_brief(project_id: int) -> dict:
 
 
 # ============================================================
-# API KEY PROTECTION (applies to ALL tools)
+# SIGN-IN PROTECTION (applies to ALL tools)
+# ============================================================
+#
+# Every request must carry a SpecPilot OAuth access token (obtained when the
+# user signs in from Bolt). The token is checked by the SpecPilot backend
+# (/oauth/exchange), which answers with a short-lived API token for that same
+# user. The caller's own token is never forwarded to the API.
 # ============================================================
 
-class ApiKeyMiddleware:
-    """Pure ASGI middleware: require 'Authorization: Bearer <MCP_API_KEY>'."""
+class OAuthMiddleware:
+    """Pure ASGI middleware: require a valid SpecPilot sign-in on every request."""
 
-    def __init__(self, app, api_key: str):
+    def __init__(
+        self,
+        app,
+        resource_url: str,
+        issuer: str,
+        backend_url: str,
+        service_key: str,
+    ):
         self.app = app
-        self.api_key = api_key.encode()
+        self.resource_url = resource_url.rstrip("/")
+        self.issuer = issuer.rstrip("/")
+        self.backend_url = backend_url.rstrip("/")
+        self.service_key = service_key
+
+        parts = urlsplit(self.resource_url)
+        self.metadata_url = (
+            f"{parts.scheme}://{parts.netloc}"
+            f"/.well-known/oauth-protected-resource{parts.path}"
+        )
+
+    async def _send_json(self, send, status: int, payload: dict, extra_headers=()):
+        body = json.dumps(payload).encode()
+        await send({
+            "type": "http.response.start",
+            "status": status,
+            "headers": [
+                (b"content-type", b"application/json"),
+                (b"content-length", str(len(body)).encode()),
+                (b"cache-control", b"no-store"),
+                *extra_headers,
+            ],
+        })
+        await send({"type": "http.response.body", "body": body})
+
+    async def _challenge(self, send, error: Optional[str] = None):
+        value = f'Bearer resource_metadata="{self.metadata_url}", scope="specpilot"'
+        if error:
+            value += f', error="{error}"'
+        await self._send_json(
+            send,
+            401,
+            {"error": "Unauthorized"},
+            [(b"www-authenticate", value.encode())],
+        )
+
+    async def _exchange(self, token: str):
+        """Returns (user, api_token), or None when the token is not valid."""
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                f"{self.backend_url}/oauth/exchange",
+                json={"token": token},
+                headers={"X-Service-Key": self.service_key},
+            )
+
+        if response.status_code == 401:
+            return None
+
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"token exchange failed with status {response.status_code}"
+            )
+
+        data = response.json()
+        user = {"user_id": data["user_id"], "name": data.get("name")}
+        return user, data["api_token"]
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
 
-        provided = b""
-        for name, value in scope.get("headers", []):
-            if name == b"authorization":
-                provided = value
-                break
-
-        prefix = b"Bearer "
-        token = provided[len(prefix):] if provided.startswith(prefix) else b""
-
-        if not hmac.compare_digest(token, self.api_key):
-            body = b'{"error":"Unauthorized"}'
-            await send({
-                "type": "http.response.start",
-                "status": 401,
-                "headers": [
-                    (b"content-type", b"application/json"),
-                    (b"content-length", str(len(body)).encode()),
-                    (b"www-authenticate", b"Bearer"),
-                ],
+        # Discovery document: tells the client where to sign in (no login needed).
+        if scope.get("path", "").startswith("/.well-known/oauth-protected-resource"):
+            await self._send_json(send, 200, {
+                "resource": self.resource_url,
+                "authorization_servers": [self.issuer],
+                "bearer_methods_supported": ["header"],
+                "scopes_supported": ["specpilot"],
+                "resource_name": "SpecPilot MCP Server",
             })
-            await send({"type": "http.response.body", "body": body})
             return
 
-        await self.app(scope, receive, send)
+        token = ""
+        for name, value in scope.get("headers", []):
+            if name == b"authorization":
+                scheme, _, rest = value.decode("latin-1").partition(" ")
+                if scheme.lower() == "bearer":
+                    token = rest.strip()
+                break
+
+        if not token:
+            await self._challenge(send)
+            return
+
+        try:
+            result = await self._exchange(token)
+        except Exception as exc:
+            logger.error("Sign-in check failed: %s", exc)
+            await self._send_json(
+                send,
+                503,
+                {"error": "Authentication service unavailable"},
+            )
+            return
+
+        if result is None:
+            await self._challenge(send, "invalid_token")
+            return
+
+        user, api_token = result
+
+        user_reset = _current_user.set(user)
+        token_reset = _api_token.set(api_token)
+        try:
+            await self.app(scope, receive, send)
+        finally:
+            _api_token.reset(token_reset)
+            _current_user.reset(user_reset)
+
+
+def _require_env(name: str, min_len: int = 1) -> str:
+    value = (os.getenv(name) or "").strip()
+    if len(value) < min_len:
+        raise SystemExit(f"{name} environment variable is not set. Refusing to start.")
+    return value
 
 
 def build_app():
-    api_key = os.getenv("MCP_API_KEY")
-    if not api_key:
-        raise SystemExit("MCP_API_KEY environment variable is not set. Refusing to start.")
+    resource_url = _require_env("MCP_RESOURCE_URL")
+    issuer = _require_env("OAUTH_ISSUER")
+    service_key = _require_env("MCP_SERVICE_KEY", 32)
 
     # When the server is reached through a tunnel, the Host header is the
-    # tunnel's hostname (e.g. abc123.ngrok-free.app). List it in
+    # tunnel's hostname (e.g. abc123.trycloudflare.com). List it in
     # MCP_ALLOWED_HOSTS (comma-separated, hostname only, no https://).
     extra_hosts = [
         h.strip()
@@ -776,8 +851,19 @@ def build_app():
             allowed_hosts=["127.0.0.1:*", "localhost:*", *extra_hosts],
         )
 
-    app = mcp.streamable_http_app(host="127.0.0.1",transport_security=security,json_response=True,stateless_http=True,)
-    app.add_middleware(ApiKeyMiddleware, api_key=api_key)
+    app = mcp.streamable_http_app(
+        host="127.0.0.1",
+        transport_security=security,
+        json_response=True,
+        stateless_http=True,
+    )
+    app.add_middleware(
+        OAuthMiddleware,
+        resource_url=resource_url,
+        issuer=issuer,
+        backend_url=SPEC_PILOT_API,
+        service_key=service_key,
+    )
     return app
 
 

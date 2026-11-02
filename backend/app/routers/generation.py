@@ -17,7 +17,8 @@ from app.database import get_db
 from app.models import Project, Task, ProjectRequirement
 from app.agents.generation_manager.runner import run_generation
 from app.services.prd_format import to_readable
-
+from app.auth import get_current_user
+from app.models import Project, Task, ProjectRequirement, User
 router = APIRouter(
     prefix="/generation",
     tags=["generation"]
@@ -33,14 +34,19 @@ def to_text(value) -> str:
     return to_readable(value)
 
 
+
+
 def get_project_or_404(
     project_id: int,
-    db: Session
+    db: Session,
+    current_user: User
 ) -> Project:
-
     project = (
         db.query(Project)
-        .filter(Project.id == project_id)
+        .filter(
+            Project.id == project_id,
+            Project.user_id == current_user.id
+        )
         .first()
     )
 
@@ -60,7 +66,8 @@ def get_project_or_404(
 @router.post("/run/{project_id}")
 def run_generation_pipeline(
     project_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
 ):
 
     # --------------------------------------------------------
@@ -69,7 +76,8 @@ def run_generation_pipeline(
 
     project = get_project_or_404(
         project_id,
-        db
+        db,
+        current_user
     )
 
     # --------------------------------------------------------

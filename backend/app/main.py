@@ -17,7 +17,7 @@ from app.routers.project import router as projects_router
 from app.routers.generation import router as generation_router
 from pathlib import Path
 from fastapi.responses import FileResponse
-
+from app.routers import oauth
 
 # =========================================================
 # DATABASE & DIRECTORIES
@@ -91,7 +91,7 @@ app.include_router(projects_router)
 
 app.include_router(audio.router)
 app.include_router(codebase.router)
-
+app.include_router(oauth.router)
 # =========================================================
 # HOME
 # =========================================================

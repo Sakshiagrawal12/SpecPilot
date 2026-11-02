@@ -20,8 +20,12 @@ from app.models import User
 # JWT CONFIGURATION
 # =========================================================
 
-SECRET_KEY = "YOUR_SECRET_KEY_CHANGE_THIS"
+import os
 
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+if not SECRET_KEY or len(SECRET_KEY) < 32:
+    raise RuntimeError("JWT_SECRET_KEY must be set (32+ characters)")
 ALGORITHM = "HS256"
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
@@ -64,11 +68,6 @@ def get_current_user(
     db: Session = Depends(get_db)
 ):
 
-    print("\n=================================")
-    print("AUTH DEBUG")
-    print("=================================")
-    print("TOKEN RECEIVED:", token)
-
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -85,7 +84,7 @@ def get_current_user(
             algorithms=[ALGORITHM]
         )
 
-        print("JWT PAYLOAD:", payload)
+        
 
         user_id = payload.get("sub")
 

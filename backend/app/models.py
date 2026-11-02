@@ -9,6 +9,7 @@ from sqlalchemy import (
     ForeignKey,
     DateTime,
     JSON,
+    Boolean
 )
 from sqlalchemy.orm import relationship
 
@@ -606,3 +607,38 @@ class Transcript(Base):
         "Project",
         back_populates="transcripts"
     )
+class OAuthClient(Base):
+    __tablename__ = "oauth_clients"
+    id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(String(64), unique=True, index=True, nullable=False)
+    client_name = Column(String(100), nullable=False)
+    redirect_uris = Column(JSON, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class OAuthAuthCode(Base):
+    __tablename__ = "oauth_auth_codes"
+    id = Column(Integer, primary_key=True, index=True)
+    code_hash = Column(String(64), unique=True, index=True, nullable=False)
+    client_id = Column(String(64), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    redirect_uri = Column(Text, nullable=False)
+    code_challenge = Column(String(128), nullable=False)
+    resource = Column(String(500), nullable=False)
+    scope = Column(String(100), nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    used = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class OAuthRefreshToken(Base):
+    __tablename__ = "oauth_refresh_tokens"
+    id = Column(Integer, primary_key=True, index=True)
+    token_hash = Column(String(64), unique=True, index=True, nullable=False)
+    client_id = Column(String(64), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    resource = Column(String(500), nullable=False)
+    scope = Column(String(100), nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    revoked = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
