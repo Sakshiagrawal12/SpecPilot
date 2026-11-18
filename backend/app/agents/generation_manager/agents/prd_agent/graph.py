@@ -16,6 +16,16 @@ from .nodes import (
     route_after_critique,
 )
 
+def route_after_assembly(state: PRDState) -> str:
+    if state.get("status") == "failed":
+        return "failed"
+
+    prd = state.get("prd")
+
+    if not isinstance(prd, dict) or not prd:
+        return "failed"
+
+    return "continue"
 
 def build_prd_agent():
 
@@ -79,9 +89,13 @@ def build_prd_agent():
         "assemble_prd",
     )
 
-    graph.add_edge(
-        "assemble_prd",
-        "critique_prd",
+    graph.add_conditional_edges(
+    "assemble_prd",
+    route_after_assembly,
+    {
+        "continue": "critique_prd",
+        "failed": END,
+    },
     )
 
     # --------------------------------------------------------

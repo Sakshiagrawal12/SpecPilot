@@ -263,7 +263,28 @@ RETURN EXACTLY THIS JSON STRUCTURE
 
         response = response.strip()
 
-        data = json.loads(response)
+        try:
+            data = json.loads(response)
+
+        except json.JSONDecodeError as exc:
+            start = max(0, exc.pos - 300)
+            end = min(len(response), exc.pos + 300)
+
+            print("\n========== INVALID PRD JSON ==========")
+            print("Error:", exc.msg)
+            print("Line:", exc.lineno)
+            print("Column:", exc.colno)
+            print("Position:", exc.pos)
+            print("Response length:", len(response))
+            print("Problematic response section:")
+            print(repr(response[start:end]))
+            print("======================================\n")
+
+            raise ValueError(
+                f"PRD assembly returned invalid JSON: "
+                f"{exc.msg} at line {exc.lineno}, "
+                f"column {exc.colno}."
+            ) from exc
 
         # ----------------------------------------------------
         # Required top-level fields

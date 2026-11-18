@@ -9,7 +9,6 @@ from app.agents.orchestrator.nodes import (
 
 
 def build_orchestrator():
-
     graph = StateGraph(OrchestratorState)
 
     graph.add_node(

@@ -490,15 +490,11 @@ def is_skip_message(
         for phrase in explicit_skip_phrases
     )
 
-
 # =========================================================
 # GENERATE-FOR-ME DETECTION
 # =========================================================
 
-def is_generate_for_me_message(
-    message: str
-) -> bool:
-
+def is_generate_for_me_message(message: str) -> bool:
     if not message:
         return False
 
@@ -509,23 +505,23 @@ def is_generate_for_me_message(
         "write this for me",
         "generate it for me",
         "generate this for me",
+        "generate for me",
         "fill it for me",
         "fill this for me",
         "you write it",
         "you can write it",
-        "write it according to you",
-        "write this according to you",
         "according to you",
+        "according to my project",
         "suggest it for me",
         "suggest one",
         "suggest something",
         "suggest for my project",
+        "what do you suggest",
+        "recommend one",
+        "create one for me",
         "you decide",
         "decide for me",
-        "fill it by yourself",
-        "fill it by your own",
         "do it for me",
-        "create it for me",
         "make one for me",
         "give me one",
     ]
@@ -541,41 +537,70 @@ def is_generate_for_me_message(
 # =========================================================
 
 def is_confirmation_message(message: str) -> bool:
-    """Checks if message is accepting a pending suggestion."""
-    normalized = message.lower().strip()
-    acceptance_keywords = [
-        "yes", "yeah", "yep", "sure", "okay", "ok", "sounds good",
-        "looks good", "use this", "use that", "go with this", "accept",
-        "use it", "can use this", "use option", "that works", "go ahead"
+    if not message:
+        return False
+
+    text = message.lower().strip()
+
+    acceptance_phrases = [
+        "yes",
+        "yeah",
+        "yep",
+        "sure",
+        "okay",
+        "ok",
+        "sounds good",
+        "looks good",
+        "use this",
+        "use that",
+        "use it",
+        "go with this",
+        "go ahead",
+        "accept",
+        "that works",
+        "you can",
+        "i agree",
     ]
-    return any(kw in normalized for kw in acceptance_keywords)
+
+    return any(
+        re.search(
+            rf"\b{re.escape(phrase)}\b",
+            text,
+        )
+        for phrase in acceptance_phrases
+    )
+
 
 # =========================================================
 # REJECTION DETECTION
 # =========================================================
 
 def is_rejection_message(message: str) -> bool:
-    """Checks if message is rejecting a pending suggestion."""
-    normalized = message.lower().strip()
-    rejection_keywords = [
-        "no", "nope", "dont use", "don't use", "reject", "change it",
-        "give another", "try again", "not this", "different one"
+    if not message:
+        return False
+
+    text = message.lower().strip()
+
+    rejection_phrases = [
+        "no",
+        "nope",
+        "don't use",
+        "dont use",
+        "reject",
+        "change it",
+        "give another",
+        "try again",
+        "not this",
+        "different one",
     ]
-    return any(kw in normalized for kw in rejection_keywords)
 
-
-def is_generate_for_me_message(message: str) -> bool:
-    """Checks if message is requesting the AI to generate a suggestion."""
-    normalized = message.lower().strip()
-    generate_keywords = [
-        "write it for me", "suggest one", "according to my project",
-        "according to you", "generate for me", "can you give",
-        "give according", "give me according", "what do you suggest",
-        "recommend one", "create one for me"
-    ]
-    return any(kw in normalized for kw in generate_keywords)
-
-
+    return any(
+        re.search(
+            rf"\b{re.escape(phrase)}\b",
+            text,
+        )
+        for phrase in rejection_phrases
+    )
 # =========================================================
 # DOCUMENT-AWARE REQUIREMENT HELPERS
 # =========================================================

@@ -46,30 +46,11 @@ from app.agents.requirement_manager.nodes import (
 # =====================================================
 # INITIAL ROUTER
 # =====================================================
-
 def route_initial_state(state: RequirementState):
 
-    uploaded_filename = getattr(
-        state,
-        "uploaded_filename",
-        None,
-    )
-
-    uploaded_file_bytes = getattr(
-        state,
-        "uploaded_file_bytes",
-        None,
-    )
-
-    document_processed = getattr(
-        state,
-        "document_processed",
-        False,
-    )
-
-    # -------------------------------------------------
-    # DOCUMENT EXISTS BUT HAS NOT BEEN PROCESSED
-    # -------------------------------------------------
+    uploaded_filename = state.get("uploaded_filename")
+    uploaded_file_bytes = state.get("uploaded_file_bytes")
+    document_processed = state.get("document_processed", False)
 
     if (
         uploaded_filename
@@ -77,10 +58,6 @@ def route_initial_state(state: RequirementState):
         and not document_processed
     ):
         return "process_document"
-
-    # -------------------------------------------------
-    # NORMAL CHAT FLOW
-    # -------------------------------------------------
 
     return "classify"
 

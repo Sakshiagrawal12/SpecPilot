@@ -4,5 +4,5 @@ __pycache__/
 *.pyc
 .env
 *.db
-
+specpilot-env.ps1
 #git archive --format=zip --output=SpecPilot.zip HEAD this command is for making the zip file of the project.

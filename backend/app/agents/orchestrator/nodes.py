@@ -15,6 +15,9 @@ def run_requirement_manager(
         requirements=state.get("requirements", {}),
         project_id=state.get("project_id"),
         project_name=state.get("project_name"),
+        pending_confirmation=state.get("pending_confirmation", False),
+    pending_generated_field=state.get("pending_generated_field"),
+    pending_generated_value=state.get("pending_generated_value"),
     )
 
     next_action = result.get(
@@ -25,7 +28,7 @@ def run_requirement_manager(
     return {
         "requirements": result.get(
             "requirements",
-            {},
+            state.get("requirements", {}),
         ),
 
         # These two were previously dropped entirely — nothing wrote
@@ -33,6 +36,7 @@ def run_requirement_manager(
         # got whatever default it fell back to (None / []).
         "current_field": result.get(
             "current_field",
+            state.get("current_field"),
         ),
 
         "missing_fields": result.get(
@@ -67,6 +71,22 @@ def run_requirement_manager(
             "READY"
             if next_action == "generate_prd"
             else "RUNNING"
+        ),
+        # Preserve pending state unless the requirement manager
+        # explicitly returns updated values.
+        "pending_confirmation": result.get(
+            "pending_confirmation",
+            state.get("pending_confirmation", False),
+        ),
+
+        "pending_generated_field": result.get(
+            "pending_generated_field",
+            state.get("pending_generated_field"),
+        ),
+
+        "pending_generated_value": result.get(
+            "pending_generated_value",
+            state.get("pending_generated_value"),
         ),
     }
 

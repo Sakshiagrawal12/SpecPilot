@@ -542,14 +542,23 @@ def handle_correction(
     # -----------------------------------------------------
 
     return {
-        "requirements": requirements,
-        "current_field": target_field,
-        "agent_response": (
-            f"No problem. Tell me what you want "
-            f"to change about "
-            f"{_field_label(target_field)}."
-        ),
-        "next_action": "wait_for_user",
+    "requirements": requirements,
+    "current_field": next_field,
+    "clarification_attempts": clarification_attempts,
+
+    "pending_confirmation": False,
+    "pending_generated_field": None,
+    "pending_generated_value": None,
+
+    "agent_response": (
+        f"Got it — I updated "
+        f"{_field_label(target_field)} "
+        f"to:\n\n"
+        f"{new_value}\n\n"
+        f"{_get_question_text(next_field)}"
+    ),
+    "next_action": "wait_for_user",
+
     }
 
 
@@ -1047,16 +1056,19 @@ def accept_generated_value(
         "pending_generated_value"
     )
 
-    if not field_name or not generated_value:
+    if not field_name or generated_value is None:
 
         return {
-            "requirements": requirements,
-            "pending_confirmation": False,
-            "agent_response": (
-                "There is no generated suggestion "
-                "waiting for confirmation."
-            ),
-            "next_action": "wait_for_user",
+        "requirements": requirements,
+        "pending_confirmation": False,
+        "pending_generated_field": None,
+        "pending_generated_value": None,
+        "agent_response": (
+            "There is no generated suggestion "
+            "waiting for confirmation. "
+            "Please provide your answer or ask me to suggest one."
+        ),
+        "next_action": "wait_for_user",
         }
 
     field_state = _ensure_field_state(
@@ -1801,7 +1813,7 @@ def generate_next_question(
 
     if not current_field:
 
-        current_field = find_next_missing_field(
+        current_field = _find_next_missing_field(
             requirements
         )
 
@@ -1918,7 +1930,7 @@ def process_uploaded_document(state: RequirementState):
     # Prevent duplicate processing
     # -----------------------------------------------------
 
-    if getattr(state, "document_processed", False):
+    if state.get("document_processed", False):
 
         return {
             "next_action": "continue_requirement_interview"

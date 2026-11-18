@@ -268,8 +268,60 @@ def get_or_create_requirements(
     requirements = copy.deepcopy(requirements)
  
     return requirement_record, requirements
- 
- 
+
+
+# =========================================================
+# PENDING GENERATED-SUGGESTION PERSISTENCE
+# =========================================================
+
+PENDING_KEY = "_pending"
+
+
+def get_pending_state(requirements: dict) -> dict:
+    """Read pending confirmation metadata stored with requirements."""
+    pending = requirements.get(PENDING_KEY)
+
+    if not isinstance(pending, dict):
+        return {
+            "pending_confirmation": False,
+            "pending_generated_field": None,
+            "pending_generated_value": None,
+        }
+
+    return {
+        "pending_confirmation": bool(pending.get("pending_confirmation", False)),
+        "pending_generated_field": pending.get("pending_generated_field"),
+        "pending_generated_value": pending.get("pending_generated_value"),
+    }
+
+
+def save_pending_state(requirements: dict, result: dict) -> dict:
+    """Persist pending metadata without mixing it into interview fields."""
+    saved = copy.deepcopy(requirements or {})
+
+    is_pending = bool(result.get("pending_confirmation", False))
+    pending_field = result.get("pending_generated_field")
+    pending_value = result.get("pending_generated_value")
+
+    if is_pending and pending_field and pending_value is not None:
+        saved[PENDING_KEY] = {
+            "pending_confirmation": True,
+            "pending_generated_field": pending_field,
+            "pending_generated_value": pending_value,
+        }
+    else:
+        saved.pop(PENDING_KEY, None)
+
+    return saved
+
+
+def clean_requirements(requirements: dict) -> dict:
+    """Remove internal state before returning requirements to the frontend."""
+    clean = copy.deepcopy(requirements or {})
+    clean.pop(PENDING_KEY, None)
+    return clean
+
+
 # =========================================================
 # GET OR CREATE CONVERSATION
 # =========================================================
@@ -550,6 +602,9 @@ def start_agent(
         )
     )
  
+    # /start is a fresh initialization turn, not a confirmation reply.
+    requirements.pop(PENDING_KEY, None)
+
     # =====================================================
     # MAKE SURE PROJECT NAME IS STORED
     # =====================================================
@@ -663,6 +718,8 @@ def start_agent(
     if updated_requirements is None:
  
         updated_requirements = requirements
+
+    updated_requirements = save_pending_state(updated_requirements, result)
  
     # =====================================================
     # COMPLETENESS
@@ -782,7 +839,7 @@ def start_agent(
             ),
  
         "requirements":
-            updated_requirements,
+            clean_requirements(updated_requirements),
  
         "completeness_status":
             completeness_status,
@@ -963,8 +1020,11 @@ def chat_with_agent(
  
         )
     )
+    pending_state = get_pending_state(requirements)
+    requirements.pop(PENDING_KEY, None)
+
     current_field = find_next_missing_field(
-    requirements
+        requirements
     )
     print("\n========================================")
     print("REQUIREMENTS FROM DATABASE")
@@ -1007,7 +1067,16 @@ def chat_with_agent(
             current_field=(
                 None if request.initialize else current_field
             ),
- 
+
+            pending_confirmation=(
+                False if request.initialize else pending_state["pending_confirmation"]
+            ),
+            pending_generated_field=(
+                None if request.initialize else pending_state["pending_generated_field"]
+            ),
+            pending_generated_value=(
+                None if request.initialize else pending_state["pending_generated_value"]
+            ),
         )
  
  
@@ -1094,6 +1163,8 @@ def chat_with_agent(
     if updated_requirements is None:
  
         updated_requirements = requirements
+
+    updated_requirements = save_pending_state(updated_requirements, result)
  
  
     # -----------------------------------------------------
@@ -1217,7 +1288,11 @@ def chat_with_agent(
             agent_response,
  
         "requirements":
-            updated_requirements,
+            clean_requirements(updated_requirements),
+
+        "pending_confirmation": result.get("pending_confirmation", False),
+        "pending_generated_field": result.get("pending_generated_field"),
+        "pending_generated_value": result.get("pending_generated_value"),
  
         "completeness_status":
             completeness_status,
@@ -1285,6 +1360,9 @@ def update_project_requirement(
     project = get_project_or_404(project_id, db, current_user)
     requirement_record, requirements = get_or_create_requirements(project.id, db)
 
+    # A direct user edit supersedes any outstanding generated suggestion.
+    requirements.pop(PENDING_KEY, None)
+
     field_key = request.field
     new_value = request.value.strip()
 
@@ -1301,7 +1379,7 @@ def update_project_requirement(
     db.add(project)
     db.commit()
 
-    return {"status": "success", "requirements": requirements}
+    return {"status": "success", "requirements": clean_requirements(requirements)}
 
 
 def apply_text_to_requirements(
@@ -1313,6 +1391,7 @@ def apply_text_to_requirements(
     db.commit()
 
     requirement_record, requirements = get_or_create_requirements(project.id, db)
+    requirements.pop(PENDING_KEY, None)
 
     try:
         doc_result = extract_requirements_from_document(
@@ -1339,6 +1418,10 @@ def apply_text_to_requirements(
         raise HTTPException(500, f"Failed to continue interview: {str(e)}")
 
     updated_requirements = next_turn.get("requirements", updated_requirements)
+    if updated_requirements is None:
+        updated_requirements = doc_result["requirements"]
+    updated_requirements = save_pending_state(updated_requirements, next_turn)
+
     completeness_status = next_turn.get("completeness_status", "INCOMPLETE")
     completeness_score = next_turn.get("completeness_score", 0)
 
@@ -1368,7 +1451,10 @@ def apply_text_to_requirements(
         "message": agent_response,
         "response": agent_response,
         "filled_fields": filled_fields,
-        "requirements": updated_requirements,
+        "requirements": clean_requirements(updated_requirements),
+        "pending_confirmation": next_turn.get("pending_confirmation", False),
+        "pending_generated_field": next_turn.get("pending_generated_field"),
+        "pending_generated_value": next_turn.get("pending_generated_value"),
         "completeness_status": completeness_status,
         "completeness_score": completeness_score,
         "missing_fields": next_turn.get("missing_fields", []),
@@ -1653,6 +1739,7 @@ def get_requirement_details(
         project.id,
         db
     )
+    requirements.pop(PENDING_KEY, None)
 
     return {
 
@@ -1780,18 +1867,8 @@ def update_requirement_details(
 
     filled = len(INTERVIEW_FIELDS) - len(missing)
 
-    # -----------------------------------------------------
-    # KEEP THE INTERVIEW ENGINE'S OWN STATE CONSISTENT
-    # (only present when the dialogue engine is in use)
-    # -----------------------------------------------------
-
-    agent_state = requirements.get("_agent_state")
-
-    if isinstance(agent_state, dict):
-
-        agent_state["pending"] = None
-        agent_state["accept_raw"] = None
-        agent_state["phase"] = "done" if complete else "interview"
+    # A manual edit supersedes an outstanding generated suggestion.
+    requirements.pop(PENDING_KEY, None)
 
     # -----------------------------------------------------
     # PERSIST

@@ -171,29 +171,36 @@ def assemble_prd(
 # ============================================================
 # PRD CRITIQUE
 # ============================================================
-
 def critique_prd(
     state: PRDState,
 ) -> Dict[str, Any]:
 
-    try:
-
-        result = prd_critic_agent.review(
-
-            requirements=state[
-                "requirements"
-            ],
-
-            requirement_analysis=state[
-                "requirement_analysis"
-            ],
-
-            user_workflows=state.get(
-                "user_workflows",
-                [],
+    # Never run the critic if assembly failed.
+    if state.get("status") == "failed":
+        return {
+            "stage": "prd",
+            "status": "failed",
+            "error": state.get(
+                "error",
+                "PRD assembly failed.",
             ),
+        }
 
-            prd=state.get("prd"),
+    prd = state.get("prd")
+
+    if not isinstance(prd, dict) or not prd:
+        return {
+            "stage": "prd",
+            "status": "failed",
+            "error": "PRD is missing before critique.",
+        }
+
+    try:
+        result = prd_critic_agent.review(
+            requirements=state["requirements"],
+            requirement_analysis=state["requirement_analysis"],
+            user_workflows=state.get("user_workflows", []),
+            prd=prd,
         )
 
         return {
@@ -204,13 +211,11 @@ def critique_prd(
         }
 
     except Exception as exc:
-
         return {
+            "stage": "prd",
             "status": "failed",
-            "error": str(exc),
+            "error": f"PRD critique failed: {exc}",
         }
-
-
 # ============================================================
 # REVISION CONTROL
 # ============================================================

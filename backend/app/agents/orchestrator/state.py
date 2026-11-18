@@ -31,7 +31,10 @@ class OrchestratorState(TypedDict, total=False):
     # orchestrator's output got nothing back.
     current_field: Optional[str]
     missing_fields: List[str]
-
+    # Pending generated-suggestion confirmation
+    pending_confirmation: bool
+    pending_generated_field: Optional[str]
+    pending_generated_value: Optional[str]
     # Manager response
     agent_response: str
 

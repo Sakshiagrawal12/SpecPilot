@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List,Optional
 from typing_extensions import TypedDict
 
 
@@ -87,8 +87,8 @@ class RequirementState(TypedDict, total=False):
     # The generated value is NOT immediately stored.
     # It first waits for user confirmation.
 
-    pending_generated_field: str
-    pending_generated_value: str
+    pending_generated_field: Optional[str]
+    pending_generated_value: Optional[str]
 
     # True while waiting for:
     # yes / no / accept / reject

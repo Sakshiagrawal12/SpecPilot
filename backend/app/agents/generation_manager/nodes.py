@@ -58,13 +58,13 @@ def generate_description(
 # =========================================================
 # STAGE: PRD
 # =========================================================
+
 def generate_prd(state: GenerationState) -> Dict[str, Any]:
 
     project = state["project"]
     requirements = state.get("requirements", {})
 
     try:
-
         result = prd_agent.invoke(
             {
                 "project": project,
@@ -74,30 +74,53 @@ def generate_prd(state: GenerationState) -> Dict[str, Any]:
             }
         )
 
-    except Exception as e:
+        print("\n========== PRD AGENT DEBUG ==========")
+        print("Result type:", type(result))
+        print("Result keys:", list(result.keys()) if isinstance(result, dict) else "Not a dictionary")
+        print("PRD status:", result.get("status") if isinstance(result, dict) else None)
+        print("PRD value:", result.get("prd") if isinstance(result, dict) else None)
+        print("=====================================\n")
+
+        if not isinstance(result, dict):
+            raise ValueError("PRD Agent returned an invalid result.")
+
+        if result.get("status") == "failed":
+            return {
+                "stage": "prd",
+                "status": "failed",
+                "error": result.get("error", "PRD Agent failed."),
+            }
+
+        generated_prd = result.get("prd")
+
+        if not isinstance(generated_prd, dict) or not generated_prd:
+            return {
+                "stage": "prd",
+                "status": "failed",
+                "error": (
+                    "PRD Agent completed without returning a valid PRD. "
+                    f"Returned keys: {list(result.keys())}"
+                ),
+            }
+
+        print("PRD successfully passed to Generation Manager.")
+
+        return {
+            "stage": "prd",
+            "prd": generated_prd,
+            "status": "in_progress",
+            "error": None,
+        }
+
+    except Exception as exc:
+        print("PRD GENERATION ERROR:", repr(exc))
 
         return {
             "stage": "prd",
             "status": "failed",
-            "error": f"PRD generation failed: {e}",
+            "error": f"PRD generation failed: {exc}",
         }
 
-    if result.get("status") == "failed":
-
-        return {
-            "stage": "prd",
-            "status": "failed",
-            "error": result.get(
-                "error",
-                "PRD Agent failed."
-            ),
-        }
-
-    return {
-        "stage": "prd",
-        "prd": result.get("prd"),
-        "status": "in_progress",
-    }
 
 # =========================================================
 # STAGE: TASKS
