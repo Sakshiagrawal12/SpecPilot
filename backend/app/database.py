@@ -1,42 +1,46 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+
+import os
 from pathlib import Path
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-# =========================================================
-# DATABASE PATH
-# =========================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DATABASE_PATH = BASE_DIR / "specpilot.db"
+# Use PostgreSQL when DATABASE_URL is configured.
+# Otherwise, continue using SQLite locally.
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
+if DATABASE_URL:
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace(
+            "postgres://",
+            "postgresql://",
+            1
+        )
 
+    connect_args = {"sslmode": "require"}
 
-print("====================================")
-print("DATABASE CONFIGURATION")
-print("====================================")
-print("Database path:")
-print(DATABASE_PATH)
-print("====================================")
+    print("Using PostgreSQL database")
 
+else:
+    DATABASE_PATH = BASE_DIR / "specpilot.db"
+    DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
 
-# =========================================================
-# DATABASE ENGINE
-# =========================================================
+    connect_args = {
+        "check_same_thread": False
+    }
+
+    print("Using local SQLite database:", DATABASE_PATH)
+
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={
-        "check_same_thread": False
-    }
+    connect_args=connect_args,
+    pool_pre_ping=True
 )
 
-
-# =========================================================
-# SESSION
-# =========================================================
 
 SessionLocal = sessionmaker(
     autocommit=False,
@@ -45,19 +49,10 @@ SessionLocal = sessionmaker(
 )
 
 
-# =========================================================
-# BASE
-# =========================================================
-
 Base = declarative_base()
 
 
-# =========================================================
-# DATABASE DEPENDENCY
-# =========================================================
-
 def get_db():
-
     db = SessionLocal()
 
     try:
@@ -65,4 +60,3 @@ def get_db():
 
     finally:
         db.close()
-        
