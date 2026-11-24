@@ -6,7 +6,7 @@ from fastapi import (
     status
 )
 
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from jose import jwt, JWTError
 
@@ -31,10 +31,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/auth/login"
-)
-
+oauth2_scheme = HTTPBearer()
 
 # =========================================================
 # CREATE ACCESS TOKEN
@@ -64,9 +61,10 @@ def create_access_token(user_id: int):
 # GET CURRENT USER
 # =========================================================
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ):
+    token = credentials.credentials
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
