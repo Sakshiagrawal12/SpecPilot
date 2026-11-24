@@ -41,7 +41,7 @@
 
   function init(userCfg) {
     var cfg = Object.assign({
-      apiBase: "http://127.0.0.1:8000",
+      apiBase: "https://specpilot-1.onrender.com",
       inputSelector: "#messageInput",   // your chat textbox
       sendButtonSelector: null,          // mic is placed before this button (auto-detected if null)
       fileInputSelector: "#documentUploadInput", // your attach-file input; audio files picked here go to transcription

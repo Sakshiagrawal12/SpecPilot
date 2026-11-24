@@ -17,7 +17,7 @@ console.log(
 );
 console.log("Access token exists:", !!localStorage.getItem("access_token"));
 console.log("=================================");
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://specpilot-1.onrender.com";
 
 let currentProject = null;
 let generatedContent = null;

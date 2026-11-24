@@ -8,7 +8,7 @@ import { parseJSONIfPossible, setContent } from "./utils.js";
 // fetch() below resolves against whatever origin is serving this HTML
 // file (e.g. a static file server), not the FastAPI backend, and the
 // request 404s.
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://specpilot-1.onrender.com";
 
 let currentWorkflowText = "";
 let currentMermaidCode = "";
