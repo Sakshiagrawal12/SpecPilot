@@ -5,4 +5,24 @@ __pycache__/
 .env
 *.db
 specpilot-env.ps1
+# Python generated files
+**/__pycache__/
+*.py[cod]
+
+# Local databases and backups
+*.db
+*.db-*
+*.db.backup*
+*.db.before-revert
+
+# ZIP archives
+*.zip
+
+# Local backup files
+*.backup
+*.backup-*
+
+# Environment files
+.env
+.env.*
 #git archive --format=zip --output=SpecPilot.zip HEAD this command is for making the zip file of the project.
